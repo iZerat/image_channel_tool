@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Channel Tool</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* CSS Variables */
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #10b981;
+            --background-color: #f3f4f6;
+            --card-background: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+            --hover-color: #4338ca;
+            --secondary-hover: #059669;
+        }
+
+        /* Body Styles */
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Tabs */
+        .tabs {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tabs nav {
+            display: flex;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 0.5rem;
+        }
+
+        .tab:hover {
+            color: var(--text-color);
+        }
+
+        .tab-active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Tab Panels */
+        .tab-panel {
+            display: block;
+        }
+
+        .tab-panel.hidden {
+            display: none;
+        }
+
+        /* Channel Grid */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .combined-card {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .split-upload-card {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Channel Titles */
+        .channel-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .combined-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .split-upload-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .split-results-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Color Indicators */
+        .color-indicator {
+            width: 1rem;
+            height: 1rem;
+            display: inline-block;
+            margin-right: 0.5rem;
+            border-radius: 2px;
+        }
+
+        .color-indicator.red { background-color: #ef4444; }
+        .color-indicator.green { background-color: #22c55e; }
+        .color-indicator.blue { background-color: #3b82f6; }
+        .color-indicator.gray { background-color: #6b7280; }
+
+        /* Canvas Containers */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--border-color);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .canvas-container.drag-over {
+            border-color: var(--primary-color);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .combined-container,
+        .split-upload-container {
+            height: 300px;
+        }
+
+        /* Drop Hint */
+        .drop-hint {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #6b7280;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.875rem;
+        }
+
+        .canvas-container.drag-over .drop-hint {
+            opacity: 1;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Button Groups */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--hover-color);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-icon {
+            margin-right: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* Combined Actions */
+        .combined-actions,
+        .split-upload-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Split Grid */
+        .split-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Download All Container */
+        .download-all-container {
+            margin-top: 2rem;
+        }
+
+        .btn-full-width {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.125rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border-radius: 5px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .channel-grid,
+            .split-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .combined-actions,
+            .split-upload-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Image Channel Tool</h1>
+        </header>
+
+        <div class="tabs">
+            <nav>
+                <button id="split-tab" class="tab tab-active">
+                    Split Channels
+                </button>
+                <button id="combine-tab" class="tab">
+                    Combine Channels
+                </button>
+            </nav>
+        </div>
+
+        <div id="split-panel" class="tab-panel">
+            <div class="card split-upload-card">
+                <h3 class="split-upload-title">Upload RGBA Image</h3>
+                <div id="split-input-container" class="canvas-container split-upload-container">
+                    <canvas id="split-input-canvas"></canvas>
+                    <div class="drop-hint">
+                        <span class="upload-icon">📁</span>
+                        <p>Drop image or click to upload</p>
+                    </div>
+                </div>
+                <input type="file" id="split-input" class="hidden" accept="image/*">
+                <div class="split-upload-actions">
+                    <button id="split-upload" class="btn btn-primary">
+                        <span class="btn-icon">↑</span> Upload Image
+                    </button>
+                    <button id="split-btn" class="btn btn-secondary">
+                        <span class="btn-icon">⚡</span> Split Channels
+                    </button>
+                </div>
+            </div>
+
+            <div id="split-results" class="hidden">
+                <h3 class="split-results-title">Split Channels</h3>
+                <div class="split-grid">
+                    <div class="card">
+                        <h3 class="channel-title">
+                            <span class="color-indicator red"></span>
+                            Red Channel
+                        </h3>
+                        <div class="canvas-container">
+                            <canvas id="split-red-canvas"></canvas>
+                        </div>
+                        <div class="button-group">
+                            <button id="download-red" class="btn btn-primary">
+                                <span class="btn-icon">↓</span> Download
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="channel-title">
+                            <span class="color-indicator green"></span>
+                            Green Channel
+                        </h3>
+                        <div class="canvas-container">
+                            <canvas id="split-green-canvas"></canvas>
+                        </div>
+                        <div class="button-group">
+                            <button id="download-green" class="btn btn-primary">
+                                <span class="btn-icon">↓</span> Download
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="channel-title">
+                            <span class="color-indicator blue"></span>
+                            Blue Channel
+                        </h3>
+                        <div class="canvas-container">
+                            <canvas id="split-blue-canvas"></canvas>
+                        </div>
+                        <div class="button-group">
+                            <button id="download-blue" class="btn btn-primary">
+                                <span class="btn-icon">↓</span> Download
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="channel-title">
+                            <span class="color-indicator gray"></span>
+                            Alpha Channel
+                        </h3>
+                        <div class="canvas-container">
+                            <canvas id="split-alpha-canvas"></canvas>
+                        </div>
+                        <div class="button-group">
+                            <button id="download-alpha" class="btn btn-primary">
+                                <span class="btn-icon">↓</span> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="download-all-container">
+                <button id="download-all" class="btn btn-secondary btn-full-width">
+                    <span class="btn-icon">📥</span> Download All Channels
+                </button>
+            </div>
+        </div>
+<div id="combine-panel" class="tab-panel hidden">
+            <div class="channel-grid">
+                <div class="card">
+                    <h3 class="channel-title">
+                        <span class="color-indicator red"></span>
+                        Red Channel
+                    </h3>
+                    <div id="red-canvas" class="canvas-container">
+                        <canvas></canvas>
+                        <div class="drop-hint">
+                            <span class="upload-icon">📁</span>
+                            <p>Drop image here</p>
+                        </div>
+                    </div>
+                    <input type="file" id="red-input" class="hidden" accept="image/*">
+                    <div class="button-group">
+                        <button id="red-upload" class="btn btn-primary">
+                            <span class="btn-icon">↑</span> Upload
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="channel-title">
+                        <span class="color-indicator green"></span>
+                        Green Channel
+                    </h3>
+                    <div id="green-canvas" class="canvas-container">
+                        <canvas></canvas>
+                        <div class="drop-hint">
+                            <span class="upload-icon">📁</span>
+                            <p>Drop image here</p>
+                        </div>
+                    </div>
+                    <input type="file" id="green-input" class="hidden" accept="image/*">
+                    <div class="button-group">
+                        <button id="green-upload" class="btn btn-primary">
+                            <span class="btn-icon">↑</span> Upload
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="channel-title">
+                        <span class="color-indicator blue"></span>
+                        Blue Channel
+                    </h3>
+                    <div id="blue-canvas" class="canvas-container">
+                        <canvas></canvas>
+                        <div class="drop-hint">
+                            <span class="upload-icon">📁</span>
+                            <p>Drop image here</p>
+                        </div>
+                    </div>
+                    <input type="file" id="blue-input" class="hidden" accept="image/*">
+                    <div class="button-group">
+                        <button id="blue-upload" class="btn btn-primary">
+                            <span class="btn-icon">↑</span> Upload
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="channel-title">
+                        <span class="color-indicator gray"></span>
+                        Alpha Channel
+                    </h3>
+                    <div id="alpha-canvas" class="canvas-container">
+                        <canvas></canvas>
+                        <div class="drop-hint">
+                            <span class="upload-icon">📁</span>
+                            <p>Drop image here</p>
+                        </div>
+                    </div>
+                    <input type="file" id="alpha-input" class="hidden" accept="image/*">
+                    <div class="button-group">
+                        <button id="alpha-upload" class="btn btn-primary">
+                            <span class="btn-icon">↑</span> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card combined-card">
+                <h3 class="combined-title">Combined RGBA Image</h3>
+                <div class="canvas-container combined-container">
+                    <canvas id="combined-canvas"></canvas>
+                </div>
+                <div class="combined-actions">
+                    <button id="combine-btn" class="btn btn-secondary">
+                        <span class="btn-icon">🔄</span> Combine Channels
+                    </button>
+                    <button id="download-combined" class="btn btn-primary">
+                        <span class="btn-icon">↓</span> Download Image
+                    </button>
+                </div>
+            </div>
+        </div>
+
+            </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const combineTab = document.getElementById('combine-tab');
+        const splitTab = document.getElementById('split-tab');
+        const combinePanel = document.getElementById('combine-panel');
+        const splitPanel = document.getElementById('split-panel');
+        const toast = document.getElementById('toast');
+
+        // Tab switching
+        combineTab.addEventListener('click', () => {
+            combineTab.classList.add('tab-active');
+            splitTab.classList.remove('tab-active');
+            combinePanel.classList.remove('hidden');
+            splitPanel.classList.add('hidden');
+        });
+
+        splitTab.addEventListener('click', () => {
+            splitTab.classList.add('tab-active');
+            combineTab.classList.remove('tab-active');
+            splitPanel.classList.remove('hidden');
+            combinePanel.classList.add('hidden');
+        });
+
+        // Toast notification
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Channel data storage
+        const channelData = {
+            red: null,
+            green: null,
+            blue: null,
+            alpha: null
+        };
+
+        // Setup channel inputs
+        ['red', 'green', 'blue', 'alpha'].forEach(channel => {
+            const uploadBtn = document.getElementById(`${channel}-upload`);
+            const input = document.getElementById(`${channel}-input`);
+            const canvasContainer = document.getElementById(`${channel}-canvas`);
+            const canvas = canvasContainer.querySelector('canvas');
+
+            uploadBtn.addEventListener('click', () => input.click());
+
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleImageUpload(e.target.files[0], canvas, channel);
+                }
+            });
+
+            // Drag and drop
+            setupDragAndDrop(canvasContainer, (file) => {
+                handleImageUpload(file, canvas, channel);
+            });
+        });
+
+        // Handle image upload
+        function handleImageUpload(file, canvas, channel) {
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload an image file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    resizeCanvasToFit(canvas, img);
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    ctx.drawImage(img, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    const channelIndex = ['red', 'green', 'blue', 'alpha'].indexOf(channel);
+
+                    const grayData = new Uint8ClampedArray(data.length);
+                    for (let i = 0; i < data.length; i += 4) {
+                        const value = data[i + channelIndex];
+                        grayData[i] = value;
+                        grayData[i + 1] = value;
+                        grayData[i + 2] = value;
+                        grayData[i + 3] = 255;
+                    }
+
+                    const grayImageData = new ImageData(grayData, canvas.width, canvas.height);
+                    ctx.putImageData(grayImageData, 0, 0);
+
+                    channelData[channel] = {
+                        width: canvas.width,
+                        height: canvas.height,
+                        data: new Uint8ClampedArray(data)
+                    };
+
+                    showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} channel image loaded.`);
+                };
+                img.onerror = () => {
+                    showToast('Failed to load image. Please try again.');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Resize canvas to fit image while maintaining aspect ratio
+        function resizeCanvasToFit(canvas, img) {
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+
+            const imgRatio = img.width / img.height;
+            const containerRatio = containerWidth / containerHeight;
+
+            let newWidth, newHeight;
+            if (imgRatio > containerRatio) {
+                newWidth = containerWidth;
+                newHeight = newWidth / imgRatio;
+            } else {
+                newHeight = containerHeight;
+                newWidth = newHeight * imgRatio;
+            }
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+        }
+
+        // Setup drag and drop
+        function setupDragAndDrop(element, onDrop) {
+            element.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                element.classList.add('drag-over');
+            });
+
+            element.addEventListener('dragleave', () => {
+                element.classList.remove('drag-over');
+            });
+
+            element.addEventListener('drop', (e) => {
+                e.preventDefault();
+                element.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    onDrop(files[0]);
+                }
+            });
+
+            element.addEventListener('click', () => {
+                const input = element.parentElement.querySelector('input[type="file"]');
+                if (input) {
+                    input.click();
+                }
+            });
+        }
+
+        // Combine channels
+        const combineBtn = document.getElementById('combine-btn');
+        const combinedCanvas = document.getElementById('combined-canvas');
+        const downloadCombinedBtn = document.getElementById('download-combined');
+
+        combineBtn.addEventListener('click', () => {
+            const hasAnyChannel = Object.values(channelData).some(data => data !== null);
+            if (!hasAnyChannel) {
+                showToast('Please upload at least one channel image.');
+                return;
+            }
+
+            let maxWidth = 0;
+            let maxHeight = 0;
+            Object.values(channelData).forEach(data => {
+                if (data) {
+                    maxWidth = Math.max(maxWidth, data.width);
+                    maxHeight = Math.max(maxHeight, data.height);
+                }
+            });
+
+            combinedCanvas.width = maxWidth;
+            combinedCanvas.height = maxHeight;
+
+            const ctx = combinedCanvas.getContext('2d');
+            ctx.clearRect(0, 0, combinedCanvas.width, combinedCanvas.height);
+
+            const combinedData = ctx.createImageData(maxWidth, maxHeight);
+
+            for (let i = 0; i < combinedData.data.length; i += 4) {
+                combinedData.data[i] = 0;
+                combinedData.data[i + 1] = 0;
+                combinedData.data[i + 2] = 0;
+                combinedData.data[i + 3] = 0;
+            }
+
+            ['red', 'green', 'blue', 'alpha'].forEach((channel, index) => {
+                const channelInfo = channelData[channel];
+                if (channelInfo) {
+                    const channelCanvas = document.createElement('canvas');
+                    channelCanvas.width = channelInfo.width;
+                    channelCanvas.height = channelInfo.height;
+                    const channelCtx = channelCanvas.getContext('2d');
+                    channelCtx.putImageData(new ImageData(channelInfo.data, channelInfo.width, channelInfo.height), 0, 0);
+
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = maxWidth;
+                    tempCanvas.height = maxHeight;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.drawImage(channelCanvas, 0, 0, maxWidth, maxHeight);
+
+                    const tempImageData = tempCtx.getImageData(0, 0, maxWidth, maxHeight);
+
+                    for (let i = 0; i < tempImageData.data.length; i += 4) {
+                        combinedData.data[i + index] = tempImageData.data[i];
+                    }
+                }
+            });
+
+            if (!channelData.alpha) {
+                for (let i = 3; i < combinedData.data.length; i += 4) {
+                    combinedData.data[i] = 255;
+                }
+            }
+
+            ctx.putImageData(combinedData, 0, 0);
+            showToast('Channels combined successfully!');
+        });
+
+        // Download combined image
+        downloadCombinedBtn.addEventListener('click', () => {
+            if (combinedCanvas.width === 0 || combinedCanvas.height === 0) {
+                showToast('Please combine channels first.');
+                return;
+            }
+            downloadCanvasAsImage(combinedCanvas, 'combined-rgba-image.png');
+        });
+
+        // Split panel functionality
+        const splitUploadBtn = document.getElementById('split-upload');
+        const splitInput = document.getElementById('split-input');
+        const splitInputCanvas = document.getElementById('split-input-canvas');
+        const splitBtn = document.getElementById('split-btn');
+        const splitResults = document.getElementById('split-results');
+        const splitInputContainer = document.getElementById('split-input-container');
+
+        splitUploadBtn.addEventListener('click', () => splitInput.click());
+
+        splitInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleSplitImageUpload(e.target.files[0]);
+            }
+        });
+
+        setupDragAndDrop(splitInputContainer, (file) => {
+            handleSplitImageUpload(file);
+        });
+
+        let originalImageData = null;
+
+        function handleSplitImageUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload an image file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    resizeCanvasToFit(splitInputCanvas, img);
+
+                    const ctx = splitInputCanvas.getContext('2d');
+                    ctx.clearRect(0, 0, splitInputCanvas.width, splitInputCanvas.height);
+
+                    splitInputCanvas.width = img.width;
+                    splitInputCanvas.height = img.height;
+
+                    ctx.drawImage(img, 0, 0);
+
+                    originalImageData = ctx.getImageData(0, 0, splitInputCanvas.width, splitInputCanvas.height);
+
+                    showToast('Image loaded. Click "Split Channels" to process.');
+                };
+                img.onerror = () => {
+                    showToast('Failed to load image. Please try again.');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Download button handlers storage to prevent duplicate binding
+        let downloadHandlersBound = false;
+
+        splitBtn.addEventListener('click', () => {
+            if (!originalImageData) {
+                showToast('Please upload an image first.');
+                return;
+            }
+
+            splitResults.classList.remove('hidden');
+
+            const channels = ['red', 'green', 'blue', 'alpha'];
+
+            channels.forEach((channel, index) => {
+                const canvas = document.getElementById(`split-${channel}-canvas`);
+                canvas.width = originalImageData.width;
+                canvas.height = originalImageData.height;
+                const ctx = canvas.getContext('2d');
+
+                const channelData = ctx.createImageData(canvas.width, canvas.height);
+
+                for (let i = 0; i < originalImageData.data.length; i += 4) {
+                    const value = originalImageData.data[i + index];
+
+                    channelData.data[i] = value;
+                    channelData.data[i + 1] = value;
+                    channelData.data[i + 2] = value;
+                    channelData.data[i + 3] = 255;
+                }
+
+                ctx.putImageData(channelData, 0, 0);
+            });
+
+            showToast('Channels split successfully!');
+
+            // Bind download handlers only once
+            if (!downloadHandlersBound) {
+                channels.forEach((channel, index) => {
+                    document.getElementById(`download-${channel}`).addEventListener('click', () => {
+                        const downloadCanvas = document.createElement('canvas');
+                        downloadCanvas.width = originalImageData.width;
+                        downloadCanvas.height = originalImageData.height;
+                        const downloadCtx = downloadCanvas.getContext('2d');
+
+                        const downloadImageData = downloadCtx.createImageData(downloadCanvas.width, downloadCanvas.height);
+                        for (let i = 0; i < originalImageData.data.length; i += 4) {
+                            const channelValue = originalImageData.data[i + index];
+                            downloadImageData.data[i] = channelValue;
+                            downloadImageData.data[i + 1] = channelValue;
+                            downloadImageData.data[i + 2] = channelValue;
+                            downloadImageData.data[i + 3] = 255;
+                        }
+                        downloadCtx.putImageData(downloadImageData, 0, 0);
+                        downloadCanvasAsImage(downloadCanvas, `${channel}-channel.png`);
+                    });
+                });
+
+                document.getElementById('download-all').addEventListener('click', () => {
+                    channels.forEach((channel, index) => {
+                        setTimeout(() => {
+                            document.getElementById(`download-${channel}`).click();
+                        }, index * 200);
+                    });
+                    showToast('All channels downloading...');
+                });
+
+                downloadHandlersBound = true;
+            }
+        });
+
+        // Download canvas as image
+        function downloadCanvasAsImage(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
