@@ -403,24 +403,23 @@
 </head>
 <body>
 <!-- ============================================
- FORMAT NOTICE: This is the PURE FRONTEND version.
- Supported formats: PNG, JPG, JPEG, GIF, WebP, BMP
- (Any format your browser can natively display.)
+ FORMAT NOTICE: This version requires the Python backend.
+ Backend supports: EXR, DDS, HDR, TIFF, TGA, PNG, JPG, 
+ GIF, WebP, BMP, and many more via imageio.
 
- NOT supported: EXR, DDS, HDR, TIFF, RAW, PSD, TGA
- For these formats, use image_channel_py.html
- with the Python backend running.
+ To start backend: run start_backend.bat
+ or: python app.py
+ Then open this file in browser.
  ============================================ -->
 <div class="container">
     <header class="header">
         <h1 class="title">Image Channel Tool</h1>
     </header>
 
-    <div class="format-notice notice-pure">
-        <strong>📋 Format Notice (Pure Frontend)</strong><br>
-        Supported: <span class="format-tag supported">PNG</span> <span class="format-tag supported">JPG</span> <span class="format-tag supported">GIF</span> <span class="format-tag supported">WebP</span> <span class="format-tag supported">BMP</span><br>
-        Not supported: <span class="format-tag unsupported">EXR</span> <span class="format-tag unsupported">DDS</span> <span class="format-tag unsupported">HDR</span> <span class="format-tag unsupported">TIFF</span> <span class="format-tag unsupported">TGA</span> <span class="format-tag unsupported">PSD</span> <span class="format-tag unsupported">RAW</span><br>
-        <em>For professional formats, switch to <a href="image_channel_py.html">image_channel_py.html</a> with Python backend.</em>
+    <div class="format-notice notice-py">
+        <strong>⚡ Format Notice (Python Backend Required)</strong><br>
+        Backend supports: <span class="format-tag supported">EXR</span> <span class="format-tag supported">DDS</span> <span class="format-tag supported">HDR</span> <span class="format-tag supported">TIFF</span> <span class="format-tag supported">TGA</span> <span class="format-tag supported">PNG</span> <span class="format-tag supported">JPG</span> <span class="format-tag supported">GIF</span> <span class="format-tag supported">WebP</span> <span class="format-tag supported">BMP</span><br>
+        <em>Run <code>start_backend.bat</code> or <code>python app.py</code> first, then refresh this page.</em>
     </div>
     <div class="tabs">
         <nav>
@@ -1002,5 +1001,41 @@
         link.click();
     }
 </script>
+
+<script>
+    // Backend API configuration
+    const API_BASE = 'http://localhost:5000/api';
+
+    async function convertWithBackend(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch(`${API_BASE}/convert`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Conversion failed');
+        }
+
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    }
+
+    async function getImageInfo(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch(`${API_BASE}/info`, {
+            method: 'POST',
+            body: formData
+        });
+
+        return response.json();
+    }
+</script>
+
 </body>
 </html>

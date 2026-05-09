@@ -1,0 +1,6 @@
+flask>=2.0.0
+flask-cors>=4.0.0
+imageio>=2.31.0
+imageio[freeimage]>=2.31.0
+numpy>=1.24.0
+pillow>=10.0.0
