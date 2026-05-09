@@ -141,13 +141,6 @@
             margin-bottom: 1rem;
         }
 
-        .split-results-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
         /* Color Indicators */
         .color-indicator {
             width: 1rem;
@@ -336,19 +329,19 @@
             }
         }
 
-        /* Format Notice Banner */
+        /* Format Notice Banner - 缩小版本 */
         .format-notice {
-            margin: 1rem 0;
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            line-height: 1.8;
-            border-left: 4px solid;
+            margin: 0.5rem 0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            border-left: 3px solid;
         }
         .format-notice strong {
-            font-size: 1rem;
+            font-size: 0.875rem;
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         .notice-pure {
             background-color: #fef3c7;
@@ -362,12 +355,12 @@
         }
         .format-tag {
             display: inline-block;
-            padding: 0.125rem 0.5rem;
+            padding: 0.0625rem 0.375rem;
             border-radius: 0.25rem;
-            font-size: 0.75rem;
+            font-size: 0.6875rem;
             font-weight: 600;
             margin-right: 0.25rem;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.125rem;
         }
         .format-tag.supported {
             background-color: #dcfce7;
@@ -383,9 +376,10 @@
         }
         .format-notice code {
             background-color: rgba(0,0,0,0.1);
-            padding: 0.125rem 0.375rem;
+            padding: 0.0625rem 0.25rem;
             border-radius: 0.25rem;
             font-family: monospace;
+            font-size: 0.75rem;
         }
         .format-notice a {
             color: inherit;
@@ -394,7 +388,7 @@
         }
         .format-notice em {
             display: block;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
             font-style: italic;
         }
     </style>
@@ -417,7 +411,7 @@
     </header>
 
     <div class="format-notice notice-py">
-        <strong>⚡ Format Notice (Python Backend Required)</strong><br>
+        <strong>⚡ Format Notice (Python Backend Required)</strong>
         Backend supports: <span class="format-tag supported">EXR</span> <span class="format-tag supported">DDS</span> <span class="format-tag supported">HDR</span> <span class="format-tag supported">TIFF</span> <span class="format-tag supported">TGA</span> <span class="format-tag supported">PNG</span> <span class="format-tag supported">JPG</span> <span class="format-tag supported">GIF</span> <span class="format-tag supported">WebP</span> <span class="format-tag supported">BMP</span><br>
         <em>Run <code>start_backend.bat</code> or <code>python app.py</code> first, then refresh this page.</em>
     </div>
@@ -454,7 +448,6 @@
         </div>
 
         <div id="split-results" class="hidden">
-            <h3 class="split-results-title">Split Channels</h3>
             <div class="split-grid">
                 <div class="card">
                     <h3 class="channel-title">
