@@ -1,3 +1,3 @@
-## 在线预览
+## Online Preview
 
-👉 [点击预览 image_channel_tool](https://你的用户名.github.io/仓库名/image_channel_tool.html)
+[Click to preview image_channel_tool](https://iZerat.github.io/image_channel_tool/image_channel_tool.html)
