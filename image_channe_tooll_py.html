@@ -391,6 +391,89 @@
             margin-top: 0.25rem;
             font-style: italic;
         }
+
+        /* ========== 合并模式开关样式（单行紧凑版） ========== */
+        .mode-toggle-bar {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: nowrap;
+        }
+
+        .mode-toggle-bar .mode-label {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9375rem;
+            white-space: nowrap;
+        }
+
+        .mode-toggle-bar .mode-text {
+            font-size: 0.875rem;
+            white-space: nowrap;
+            transition: color 0.3s;
+        }
+
+        .mode-toggle-bar .mode-text.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .mode-toggle-bar .mode-text.inactive {
+            color: #9ca3af;
+        }
+
+        .mode-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .mode-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .mode-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--primary-color);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .mode-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .mode-toggle-switch input:checked + .mode-toggle-slider {
+            background-color: var(--secondary-color);
+        }
+
+        .mode-toggle-switch input:checked + .mode-toggle-slider:before {
+            transform: translateX(22px);
+        }
     </style>
     <base target="_blank">
     <base target="_blank">
@@ -600,6 +683,17 @@
             </div>
         </div>
 
+        <!-- ========== 合并模式开关（单行紧凑版） ========== -->
+        <div class="mode-toggle-bar">
+            <span class="mode-label">🎯 Merge Mode</span>
+            <span id="mode-text-left" class="mode-text active">Extract Channel</span>
+            <label class="mode-toggle-switch">
+                <input type="checkbox" id="combine-mode-toggle">
+                <span class="mode-toggle-slider"></span>
+            </label>
+            <span id="mode-text-right" class="mode-text inactive">Grayscale First</span>
+        </div>
+
         <div class="card combined-card">
             <h3 class="combined-title">Combined RGBA Image</h3>
             <div class="canvas-container combined-container">
@@ -659,6 +753,33 @@
         alpha: null
     };
 
+    // ========== 合并模式开关状态 ==========
+    const modeToggle = document.getElementById('combine-mode-toggle');
+    const modeTextLeft = document.getElementById('mode-text-left');
+    const modeTextRight = document.getElementById('mode-text-right');
+
+    function getCombineMode() {
+        // false = Extract Channel (取对应通道), true = Grayscale First (先转黑白)
+        return modeToggle.checked;
+    }
+
+    modeToggle.addEventListener('change', () => {
+        const isGrayscaleMode = modeToggle.checked;
+        if (isGrayscaleMode) {
+            modeTextLeft.classList.remove('active');
+            modeTextLeft.classList.add('inactive');
+            modeTextRight.classList.remove('inactive');
+            modeTextRight.classList.add('active');
+            showToast('Mode: Grayscale First — images will be converted to grayscale before merging');
+        } else {
+            modeTextLeft.classList.add('active');
+            modeTextLeft.classList.remove('inactive');
+            modeTextRight.classList.remove('active');
+            modeTextRight.classList.add('inactive');
+            showToast('Mode: Extract Channel — only the corresponding color channel will be used');
+        }
+    });
+
     // Setup channel inputs
     ['red', 'green', 'blue', 'alpha'].forEach(channel => {
         const uploadBtn = document.getElementById(`${channel}-upload`);
@@ -705,25 +826,43 @@
                 const data = imageData.data;
                 const channelIndex = ['red', 'green', 'blue', 'alpha'].indexOf(channel);
 
+                // ========== 预览显示：根据当前模式决定 ==========
+                const isGrayscaleMode = getCombineMode();
                 const grayData = new Uint8ClampedArray(data.length);
-                for (let i = 0; i < data.length; i += 4) {
-                    const value = data[i + channelIndex];
-                    grayData[i] = value;
-                    grayData[i + 1] = value;
-                    grayData[i + 2] = value;
-                    grayData[i + 3] = 255;
+
+                if (isGrayscaleMode) {
+                    // 模式2：先转灰度（ luminance 公式 0.299R + 0.587G + 0.114B ）
+                    for (let i = 0; i < data.length; i += 4) {
+                        // 忽略 alpha，用 RGB 算亮度
+                        const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+                        grayData[i] = lum;
+                        grayData[i + 1] = lum;
+                        grayData[i + 2] = lum;
+                        grayData[i + 3] = 255;
+                    }
+                } else {
+                    // 模式1：取对应通道
+                    for (let i = 0; i < data.length; i += 4) {
+                        const value = data[i + channelIndex];
+                        grayData[i] = value;
+                        grayData[i + 1] = value;
+                        grayData[i + 2] = value;
+                        grayData[i + 3] = 255;
+                    }
                 }
 
                 const grayImageData = new ImageData(grayData, canvas.width, canvas.height);
                 ctx.putImageData(grayImageData, 0, 0);
 
+                // 存储原始数据，合并时根据模式重新计算
                 channelData[channel] = {
                     width: canvas.width,
                     height: canvas.height,
                     data: new Uint8ClampedArray(data)
                 };
 
-                showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} channel image loaded.`);
+                const modeLabel = isGrayscaleMode ? 'grayscale' : 'channel';
+                showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} ${modeLabel} image loaded.`);
             };
             img.onerror = () => {
                 showToast('Failed to load image. Please try again.');
@@ -796,6 +935,8 @@
             return;
         }
 
+        const isGrayscaleMode = getCombineMode();
+
         let maxWidth = 0;
         let maxHeight = 0;
         Object.values(channelData).forEach(data => {
@@ -827,7 +968,32 @@
                 channelCanvas.width = channelInfo.width;
                 channelCanvas.height = channelInfo.height;
                 const channelCtx = channelCanvas.getContext('2d');
-                channelCtx.putImageData(new ImageData(channelInfo.data, channelInfo.width, channelInfo.height), 0, 0);
+
+                // ========== 根据模式准备通道数据 ==========
+                const srcData = channelInfo.data;
+                const processedData = new Uint8ClampedArray(srcData.length);
+
+                if (isGrayscaleMode) {
+                    // 模式2：先转灰度，再取 R 通道（灰度图 R=G=B）
+                    for (let i = 0; i < srcData.length; i += 4) {
+                        const lum = Math.round(0.299 * srcData[i] + 0.587 * srcData[i + 1] + 0.114 * srcData[i + 2]);
+                        processedData[i] = lum;
+                        processedData[i + 1] = lum;
+                        processedData[i + 2] = lum;
+                        processedData[i + 3] = srcData[i + 3];
+                    }
+                } else {
+                    // 模式1：取对应通道，其余置零
+                    for (let i = 0; i < srcData.length; i += 4) {
+                        processedData[i] = 0;
+                        processedData[i + 1] = 0;
+                        processedData[i + 2] = 0;
+                        processedData[i + 3] = 255;
+                        processedData[i + index] = srcData[i + index];
+                    }
+                }
+
+                channelCtx.putImageData(new ImageData(processedData, channelInfo.width, channelInfo.height), 0, 0);
 
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = maxWidth;
@@ -837,6 +1003,7 @@
 
                 const tempImageData = tempCtx.getImageData(0, 0, maxWidth, maxHeight);
 
+                // 统一取 R 通道（因为 processedData 已经按模式处理好了）
                 for (let i = 0; i < tempImageData.data.length; i += 4) {
                     combinedData.data[i + index] = tempImageData.data[i];
                 }
@@ -850,7 +1017,8 @@
         }
 
         ctx.putImageData(combinedData, 0, 0);
-        showToast('Channels combined successfully!');
+        const modeLabel = isGrayscaleMode ? 'Grayscale' : 'Channel';
+        showToast(`${modeLabel} mode: Channels combined successfully!`);
     });
 
     // Download combined image
