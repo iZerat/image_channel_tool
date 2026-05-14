@@ -474,9 +474,32 @@
         .mode-toggle-switch input:checked + .mode-toggle-slider:before {
             transform: translateX(22px);
         }
+
+        /* ========== 文件输入框彻底隐藏 ========== */
+        input[type="file"].hidden {
+            display: none !important;
+        }
+
+        /* ========== 上传区域提示文字 ========== */
+        .upload-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #9ca3af;
+            font-size: 0.9375rem;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            text-align: center;
+            z-index: 1;
+        }
+        .upload-hint.hidden {
+            opacity: 0;
+        }
     </style>
     <base target="_blank">
     <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <!-- ============================================
@@ -515,12 +538,13 @@
             <h3 class="split-upload-title">Upload RGBA Image</h3>
             <div id="split-input-container" class="canvas-container split-upload-container">
                 <canvas id="split-input-canvas"></canvas>
+                <div class="upload-hint" id="split-hint">Click or drop image here</div>
                 <div class="drop-hint">
                     <span class="upload-icon">📁</span>
                     <p>Drop image or click to upload</p>
                 </div>
             </div>
-            <input type="file" id="split-input" class="hidden" accept="image/*">
+            <input type="file" id="split-input" class="hidden" accept="image/*" style="display:none;">
             <div class="split-upload-actions">
                 <button id="split-upload" class="btn btn-primary">
                     <span class="btn-icon">↑</span> Upload Image
@@ -610,12 +634,13 @@
                 </h3>
                 <div id="red-canvas" class="canvas-container">
                     <canvas></canvas>
+                    <div class="upload-hint">Click or drop image here</div>
                     <div class="drop-hint">
                         <span class="upload-icon">📁</span>
                         <p>Drop image here</p>
                     </div>
                 </div>
-                <input type="file" id="red-input" class="hidden" accept="image/*">
+                <input type="file" id="red-input" class="hidden" accept="image/*" style="display:none;">
                 <div class="button-group">
                     <button id="red-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
@@ -630,12 +655,13 @@
                 </h3>
                 <div id="green-canvas" class="canvas-container">
                     <canvas></canvas>
+                    <div class="upload-hint">Click or drop image here</div>
                     <div class="drop-hint">
                         <span class="upload-icon">📁</span>
                         <p>Drop image here</p>
                     </div>
                 </div>
-                <input type="file" id="green-input" class="hidden" accept="image/*">
+                <input type="file" id="green-input" class="hidden" accept="image/*" style="display:none;">
                 <div class="button-group">
                     <button id="green-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
@@ -650,12 +676,13 @@
                 </h3>
                 <div id="blue-canvas" class="canvas-container">
                     <canvas></canvas>
+                    <div class="upload-hint">Click or drop image here</div>
                     <div class="drop-hint">
                         <span class="upload-icon">📁</span>
                         <p>Drop image here</p>
                     </div>
                 </div>
-                <input type="file" id="blue-input" class="hidden" accept="image/*">
+                <input type="file" id="blue-input" class="hidden" accept="image/*" style="display:none;">
                 <div class="button-group">
                     <button id="blue-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
@@ -670,12 +697,13 @@
                 </h3>
                 <div id="alpha-canvas" class="canvas-container">
                     <canvas></canvas>
+                    <div class="upload-hint">Click or drop image here</div>
                     <div class="drop-hint">
                         <span class="upload-icon">📁</span>
                         <p>Drop image here</p>
                     </div>
                 </div>
-                <input type="file" id="alpha-input" class="hidden" accept="image/*">
+                <input type="file" id="alpha-input" class="hidden" accept="image/*" style="display:none;">
                 <div class="button-group">
                     <button id="alpha-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
@@ -804,6 +832,10 @@
 
     // Handle image upload
     function handleImageUpload(file, canvas, channel) {
+        // 隐藏上传提示文字
+        const hint = canvas.parentElement.querySelector('.upload-hint');
+        if (hint) hint.classList.add('hidden');
+
         if (!file.type.startsWith('image/')) {
             showToast('Please upload an image file.');
             return;
@@ -1054,6 +1086,10 @@
     let originalImageData = null;
 
     function handleSplitImageUpload(file) {
+        // 隐藏上传提示文字
+        const hint = document.querySelector('#split-input-container .upload-hint');
+        if (hint) hint.classList.add('hidden');
+
         if (!file.type.startsWith('image/')) {
             showToast('Please upload an image file.');
             return;
