@@ -1150,20 +1150,22 @@
         const hint = document.getElementById('split-hint');
         if (hint) hint.classList.add('hidden');
 
-        // 更新文件名显示
-        const filenameSpan = document.getElementById('split-filename');
-        filenameSpan.textContent = file.name;
-        filenameSpan.classList.remove('empty');
-
         // 检查是否为支持的图片格式（包括需要后端转换的）
         const isImage = file.type.startsWith('image/') || needsBackendConversion(file.name);
         if (!isImage) {
             showToast('Please upload an image file.');
+            // 恢复提示
+            if (hint) hint.classList.remove('hidden');
             return;
         }
 
         loadImageWithBackendSupport(file)
             .then(img => {
+                // 上传成功后才显示文件名
+                const filenameSpan = document.getElementById('split-filename');
+                filenameSpan.textContent = file.name;
+                filenameSpan.classList.remove('empty');
+
                 resizeCanvasToFit(splitInputCanvas, img);
 
                 const ctx = splitInputCanvas.getContext('2d');
@@ -1179,6 +1181,12 @@
                 showToast('Image loaded. Click "Split Channels" to process.');
             })
             .catch(err => {
+                // 上传失败，恢复提示，不显示文件名
+                if (hint) hint.classList.remove('hidden');
+                const filenameSpan = document.getElementById('split-filename');
+                filenameSpan.textContent = 'No file selected';
+                filenameSpan.classList.add('empty');
+
                 const msg = err.message || 'Failed to load image';
                 showToast(msg.length > 50 ? msg.slice(0, 50) + '...' : msg);
                 console.error(err);
