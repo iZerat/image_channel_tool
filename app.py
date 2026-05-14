@@ -16,6 +16,9 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 
 def normalize_to_rgba(img):
     """Convert any image array to uint8 RGBA"""
+    # Ensure standard numpy array (handles masked arrays, etc.)
+    img = np.asarray(img)
+
     # Handle float images (EXR/HDR)
     if img.dtype in [np.float16, np.float32, np.float64]:
         # Check if data is in 0-1 range or higher
@@ -30,15 +33,21 @@ def normalize_to_rgba(img):
     if img.ndim == 2:
         # Grayscale -> RGBA
         img = np.stack([img, img, img, np.ones_like(img) * 255], axis=-1)
-    elif img.shape[-1] == 1:
-        # Single channel -> RGBA
-        img = np.concatenate([img] * 3 + [np.ones((*img.shape[:2], 1)) * 255], axis=-1)
-    elif img.shape[-1] == 3:
-        # RGB -> RGBA
-        img = np.concatenate([img, np.ones((*img.shape[:2], 1)) * 255], axis=-1)
-    elif img.shape[-1] > 4:
-        # More than 4 channels, take first 4
-        img = img[..., :4]
+    elif img.ndim == 3:
+        if img.shape[-1] == 1:
+            # Single channel -> RGBA
+            img = np.concatenate([img] * 3 + [np.ones((*img.shape[:2], 1)) * 255], axis=-1)
+        elif img.shape[-1] == 3:
+            # RGB -> RGBA
+            img = np.concatenate([img, np.ones((*img.shape[:2], 1)) * 255], axis=-1)
+        elif img.shape[-1] > 4:
+            # More than 4 channels, take first 4
+            img = img[..., :4]
+    else:
+        raise ValueError(f"Unsupported image dimensions: {img.ndim}, shape={img.shape}")
+
+    # Ensure C-contiguous uint8 array for PIL compatibility
+    img = np.ascontiguousarray(img, dtype=np.uint8)
 
     return img
 
