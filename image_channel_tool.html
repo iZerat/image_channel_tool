@@ -475,6 +475,25 @@
             transform: translateX(22px);
         }
 
+        .upload-filename {
+            flex: 1;
+            min-width: 0;
+            margin-left: 1rem;
+            padding: 0.5rem 0.75rem;
+            background-color: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+        }
+        .upload-filename.empty {
+            color: #9ca3af;
+        }
+
         /* ========== 文件输入框彻底隐藏 ========== */
         input[type="file"].hidden {
             display: none !important;
@@ -494,7 +513,7 @@
             z-index: 1;
         }
         .upload-hint.hidden {
-            opacity: 0;
+            display: none;
         }
     </style>
     <base target="_blank">
@@ -535,7 +554,10 @@
 
     <div id="split-panel" class="tab-panel">
         <div class="card split-upload-card">
-            <h3 class="split-upload-title">Upload RGBA Image</h3>
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <h3 class="split-upload-title" style="margin-bottom: 0; white-space: nowrap;">Upload RGBA Image</h3>
+                <span id="split-filename" class="upload-filename empty">No file selected</span>
+            </div>
             <div id="split-input-container" class="canvas-container split-upload-container">
                 <canvas id="split-input-canvas"></canvas>
                 <div class="upload-hint" id="split-hint">Click or drop image here</div>
@@ -1075,7 +1097,11 @@
 
     splitInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            handleSplitImageUpload(e.target.files[0]);
+            const file = e.target.files[0];
+            const filenameSpan = document.getElementById('split-filename');
+            filenameSpan.textContent = file.name;
+            filenameSpan.classList.remove('empty');
+            handleSplitImageUpload(file);
         }
     });
 
@@ -1087,8 +1113,13 @@
 
     function handleSplitImageUpload(file) {
         // 隐藏上传提示文字
-        const hint = document.querySelector('#split-input-container .upload-hint');
+        const hint = document.getElementById('split-hint');
         if (hint) hint.classList.add('hidden');
+
+        // 更新文件名显示
+        const filenameSpan = document.getElementById('split-filename');
+        filenameSpan.textContent = file.name;
+        filenameSpan.classList.remove('empty');
 
         if (!file.type.startsWith('image/')) {
             showToast('Please upload an image file.');
