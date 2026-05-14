@@ -51,7 +51,7 @@ def pil_to_buffer(pil_img, format='PNG'):
 
 @app.route('/api/convert', methods=['POST'])
 def convert_image():
-    """Convert professional format (EXR/DDS/HDR/TIFF/etc) to PNG"""
+    """Convert professional format (EXR/DDS/HDR/TIFF/TGA/etc) to PNG"""
     if 'image' not in request.files:
         return jsonify({'error': 'No image file provided'}), 400
 
@@ -60,11 +60,34 @@ def convert_image():
         return jsonify({'error': 'Empty filename'}), 400
 
     try:
-        # Read with imageio (supports EXR, DDS, HDR, TIFF, etc.)
-        img = imageio.imread(file.read())
+        file_bytes = file.read()
+        print(f"[CONVERT] File: {file.filename}, Size: {len(file_bytes)} bytes")
+
+        img = None
+        # Try imageio v2 first (stable API)
+        try:
+            import imageio.v2 as iio
+            img = iio.imread(file_bytes)
+            print(f"[CONVERT] imageio v2 success: shape={img.shape}, dtype={img.dtype}")
+        except Exception as e1:
+            print(f"[CONVERT] imageio v2 failed: {e1}")
+            # Fallback to PIL/Pillow
+            try:
+                pil_img = Image.open(io.BytesIO(file_bytes))
+                img = np.array(pil_img)
+                print(f"[CONVERT] PIL fallback success: shape={img.shape}, dtype={img.dtype}, mode={pil_img.mode}")
+            except Exception as e2:
+                print(f"[CONVERT] PIL fallback failed: {e2}")
+                return jsonify({'error': f'Cannot read image format. imageio: {e1} | PIL: {e2}'}), 500
+
+        # Validate image data
+        if img is None or img.size == 0:
+            return jsonify({'error': 'Image data is empty after reading'}), 500
+
         rgba = normalize_to_rgba(img)
         pil_img = Image.fromarray(rgba)
         buf = pil_to_buffer(pil_img, 'PNG')
+        print(f"[CONVERT] Output PNG size: {buf.getbuffer().nbytes} bytes")
 
         return send_file(
             buf,
@@ -73,6 +96,9 @@ def convert_image():
             download_name='converted.png'
         )
     except Exception as e:
+        print(f"[CONVERT] Fatal error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': f'Conversion failed: {str(e)}'}), 500
 
 @app.route('/api/split', methods=['POST'])

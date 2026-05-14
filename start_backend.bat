@@ -57,14 +57,14 @@ REM Wait a moment for the server to start
 timeout /t 3 /nobreak >nul
 
 echo.
-echo [INFO] Opening image_channel_py.html in browser...
+echo [INFO] Opening image_channe_tool_py.html in browser...
 echo.
 
 REM Open the HTML file
-if exist "image_channel_py.html" (
-    start "" "image_channel_py.html"
+if exist "image_channe_tool_py.html" (
+    start "" "image_channe_tool_py.html"
 ) else (
-    echo [WARNING] image_channel_py.html not found in current directory.
+    echo [WARNING] image_channe_tool_py.html not found in current directory.
     echo Please navigate to the correct folder.
 )
 

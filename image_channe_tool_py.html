@@ -477,6 +477,8 @@
     </style>
     <base target="_blank">
     <base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <!-- ============================================
@@ -492,6 +494,11 @@
     <header class="header">
         <h1 class="title">Image Channel Tool</h1>
     </header>
+
+    <div id="backend-status" class="format-notice" style="border-left-color: #9ca3af; background-color: #f3f4f6; color: #4b5563;">
+        <strong>🔌 Backend Status: Checking...</strong>
+        <span id="backend-status-detail">Detecting connection to http://localhost:5000...</span>
+    </div>
 
     <div class="format-notice notice-py">
         <strong>⚡ Format Notice (Python Backend Required)</strong>
@@ -763,6 +770,89 @@
         return modeToggle.checked;
     }
 
+    // ========== 后端格式转换支持 ==========
+    const BACKEND_FORMATS = ['.tga', '.exr', '.dds', '.hdr', '.tif', '.tiff', '.webp', '.bmp'];
+
+    function needsBackendConversion(filename) {
+        const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase();
+        return BACKEND_FORMATS.includes(ext);
+    }
+
+    async function loadImageWithBackendSupport(file) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('Failed to load image'));
+
+            if (needsBackendConversion(file.name)) {
+                showToast(`Converting ${file.name} via backend...`);
+                convertWithBackend(file)
+                    .then(url => { img.src = url; })
+                    .catch(err => reject(err));
+            } else {
+                const reader = new FileReader();
+                reader.onload = (e) => { img.src = e.target.result; };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    function processUploadedImage(img, canvas, channel) {
+        resizeCanvasToFit(canvas, img);
+
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        const channelIndex = ['red', 'green', 'blue', 'alpha'].indexOf(channel);
+
+        // ========== 预览显示：根据当前模式决定 ==========
+        const isGrayscaleMode = getCombineMode();
+        const grayData = new Uint8ClampedArray(data.length);
+
+        if (isGrayscaleMode) {
+            // 模式2：先转灰度（ luminance 公式 0.299R + 0.587G + 0.114B ）
+            for (let i = 0; i < data.length; i += 4) {
+                // 忽略 alpha，用 RGB 算亮度
+                const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+                grayData[i] = lum;
+                grayData[i + 1] = lum;
+                grayData[i + 2] = lum;
+                grayData[i + 3] = 255;
+            }
+        } else {
+            // 模式1：取对应通道
+            for (let i = 0; i < data.length; i += 4) {
+                const value = data[i + channelIndex];
+                grayData[i] = value;
+                grayData[i + 1] = value;
+                grayData[i + 2] = value;
+                grayData[i + 3] = 255;
+            }
+        }
+
+        const grayImageData = new ImageData(grayData, canvas.width, canvas.height);
+        ctx.putImageData(grayImageData, 0, 0);
+
+        // 存储原始数据，合并时根据模式重新计算
+        channelData[channel] = {
+            width: canvas.width,
+            height: canvas.height,
+            data: new Uint8ClampedArray(data)
+        };
+
+        const modeLabel = isGrayscaleMode ? 'grayscale' : 'channel';
+        showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} ${modeLabel} image loaded.`);
+    }
+
+
     modeToggle.addEventListener('change', () => {
         const isGrayscaleMode = modeToggle.checked;
         if (isGrayscaleMode) {
@@ -803,73 +893,20 @@
 
     // Handle image upload
     function handleImageUpload(file, canvas, channel) {
-        if (!file.type.startsWith('image/')) {
+        // 检查是否为支持的图片格式（包括需要后端转换的）
+        const isImage = file.type.startsWith('image/') || needsBackendConversion(file.name);
+        if (!isImage) {
             showToast('Please upload an image file.');
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                resizeCanvasToFit(canvas, img);
-
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                canvas.width = img.width;
-                canvas.height = img.height;
-
-                ctx.drawImage(img, 0, 0);
-
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                const channelIndex = ['red', 'green', 'blue', 'alpha'].indexOf(channel);
-
-                // ========== 预览显示：根据当前模式决定 ==========
-                const isGrayscaleMode = getCombineMode();
-                const grayData = new Uint8ClampedArray(data.length);
-
-                if (isGrayscaleMode) {
-                    // 模式2：先转灰度（ luminance 公式 0.299R + 0.587G + 0.114B ）
-                    for (let i = 0; i < data.length; i += 4) {
-                        // 忽略 alpha，用 RGB 算亮度
-                        const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
-                        grayData[i] = lum;
-                        grayData[i + 1] = lum;
-                        grayData[i + 2] = lum;
-                        grayData[i + 3] = 255;
-                    }
-                } else {
-                    // 模式1：取对应通道
-                    for (let i = 0; i < data.length; i += 4) {
-                        const value = data[i + channelIndex];
-                        grayData[i] = value;
-                        grayData[i + 1] = value;
-                        grayData[i + 2] = value;
-                        grayData[i + 3] = 255;
-                    }
-                }
-
-                const grayImageData = new ImageData(grayData, canvas.width, canvas.height);
-                ctx.putImageData(grayImageData, 0, 0);
-
-                // 存储原始数据，合并时根据模式重新计算
-                channelData[channel] = {
-                    width: canvas.width,
-                    height: canvas.height,
-                    data: new Uint8ClampedArray(data)
-                };
-
-                const modeLabel = isGrayscaleMode ? 'grayscale' : 'channel';
-                showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} ${modeLabel} image loaded.`);
-            };
-            img.onerror = () => {
-                showToast('Failed to load image. Please try again.');
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+        loadImageWithBackendSupport(file)
+            .then(img => processUploadedImage(img, canvas, channel))
+            .catch(err => {
+                const msg = err.message || 'Failed to load image';
+                showToast(msg.length > 50 ? msg.slice(0, 50) + '...' : msg);
+                console.error(err);
+            });
     }
 
     // Resize canvas to fit image while maintaining aspect ratio
@@ -1053,15 +1090,15 @@
     let originalImageData = null;
 
     function handleSplitImageUpload(file) {
-        if (!file.type.startsWith('image/')) {
+        // 检查是否为支持的图片格式（包括需要后端转换的）
+        const isImage = file.type.startsWith('image/') || needsBackendConversion(file.name);
+        if (!isImage) {
             showToast('Please upload an image file.');
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
+        loadImageWithBackendSupport(file)
+            .then(img => {
                 resizeCanvasToFit(splitInputCanvas, img);
 
                 const ctx = splitInputCanvas.getContext('2d');
@@ -1075,13 +1112,12 @@
                 originalImageData = ctx.getImageData(0, 0, splitInputCanvas.width, splitInputCanvas.height);
 
                 showToast('Image loaded. Click "Split Channels" to process.');
-            };
-            img.onerror = () => {
-                showToast('Failed to load image. Please try again.');
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+            })
+            .catch(err => {
+                const msg = err.message || 'Failed to load image';
+                showToast(msg.length > 50 ? msg.slice(0, 50) + '...' : msg);
+                console.error(err);
+            });
     }
 
     // Download button handlers storage to prevent duplicate binding
@@ -1161,6 +1197,37 @@
         link.href = canvas.toDataURL();
         link.click();
     }
+
+    // ========== 后端连接状态检测 ==========
+    async function checkBackendStatus() {
+        const statusDiv = document.getElementById('backend-status');
+        const statusDetail = document.getElementById('backend-status-detail');
+
+        try {
+            const response = await fetch(`${API_BASE}/health`, { method: 'GET' });
+            if (response.ok) {
+                const data = await response.json();
+                statusDiv.style.borderLeftColor = '#22c55e';
+                statusDiv.style.backgroundColor = '#dcfce7';
+                statusDiv.style.color = '#166534';
+                statusDiv.querySelector('strong').textContent = '✅ Backend Status: Connected';
+                statusDetail.textContent = `API online | Supported: ${data.formats.join(', ')}`;
+            } else {
+                throw new Error('Health check failed');
+            }
+        } catch (err) {
+            statusDiv.style.borderLeftColor = '#ef4444';
+            statusDiv.style.backgroundColor = '#fee2e2';
+            statusDiv.style.color = '#991b1b';
+            statusDiv.querySelector('strong').textContent = '❌ Backend Status: Disconnected';
+            statusDetail.textContent = 'Cannot connect to http://localhost:5000. Please start backend first.';
+        }
+    }
+
+    // Check on page load
+    checkBackendStatus();
+    // Recheck every 10 seconds
+    setInterval(checkBackendStatus, 10000);
 </script>
 
 <script>
