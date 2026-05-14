@@ -520,6 +520,7 @@
     <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <!-- ============================================
@@ -1144,6 +1145,7 @@
     });
 
     let originalImageData = null;
+    let splitOriginalFilename = '';
 
     function handleSplitImageUpload(file) {
         // 隐藏上传提示文字
@@ -1177,6 +1179,10 @@
                 ctx.drawImage(img, 0, 0);
 
                 originalImageData = ctx.getImageData(0, 0, splitInputCanvas.width, splitInputCanvas.height);
+
+                // 保存原始文件名（去掉扩展名）用于下载命名
+                const lastDotIndex = file.name.lastIndexOf('.');
+                splitOriginalFilename = lastDotIndex > 0 ? file.name.slice(0, lastDotIndex) : file.name;
 
                 showToast('Image loaded. Click "Split Channels" to process.');
             })
@@ -1246,7 +1252,8 @@
                         downloadImageData.data[i + 3] = 255;
                     }
                     downloadCtx.putImageData(downloadImageData, 0, 0);
-                    downloadCanvasAsImage(downloadCanvas, `${channel}-channel.png`);
+                    const channelSuffix = { red: 'R', green: 'G', blue: 'B', alpha: 'A' }[channel];
+                    downloadCanvasAsImage(downloadCanvas, `${splitOriginalFilename}_${channelSuffix}.png`);
                 });
             });
 
