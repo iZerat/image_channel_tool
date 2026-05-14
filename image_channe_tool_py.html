@@ -474,22 +474,62 @@
         .mode-toggle-switch input:checked + .mode-toggle-slider:before {
             transform: translateX(22px);
         }
+
+        .upload-filename {
+            flex: 1;
+            min-width: 0;
+            margin-left: 1rem;
+            padding: 0.5rem 0.75rem;
+            background-color: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+        }
+        .upload-filename.empty {
+            color: #9ca3af;
+        }
+
+        /* ========== 文件输入框彻底隐藏 ========== */
+        input[type="file"].hidden {
+            display: none !important;
+        }
+
+        /* ========== 上传区域提示文字 ========== */
+        .upload-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #9ca3af;
+            font-size: 0.9375rem;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            text-align: center;
+            z-index: 1;
+        }
+        .upload-hint.hidden {
+            display: none;
+        }
     </style>
     <base target="_blank">
     <base target="_blank">
 <base target="_blank">
 <base target="_blank">
-<base target="_blank">
 </head>
 <body>
 <!-- ============================================
- FORMAT NOTICE: This version requires the Python backend.
- Backend supports: EXR, DDS, HDR, TIFF, TGA, PNG, JPG, 
- GIF, WebP, BMP, and many more via imageio.
+ FORMAT NOTICE: This is the PURE FRONTEND version.
+ Supported formats: PNG, JPG, JPEG, GIF, WebP, BMP
+ (Any format your browser can natively display.)
 
- To start backend: run start_backend.bat
- or: python app.py
- Then open this file in browser.
+ NOT supported: EXR, DDS, HDR, TIFF, RAW, PSD, TGA
+ For these formats, use image_channel_py.html
+ with the Python backend running.
  ============================================ -->
 <div class="container">
     <header class="header">
@@ -519,7 +559,10 @@
 
     <div id="split-panel" class="tab-panel">
         <div class="card split-upload-card">
-            <h3 class="split-upload-title">Upload RGBA Image</h3>
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <h3 class="split-upload-title" style="margin-bottom: 0; white-space: nowrap;">Upload RGBA Image</h3>
+                <span id="split-filename" class="upload-filename empty">No file selected</span>
+            </div>
             <div id="split-input-container" class="canvas-container split-upload-container">
                 <canvas id="split-input-canvas"></canvas>
                 <div class="upload-hint" id="split-hint">Click or drop image here</div>
@@ -805,10 +848,6 @@
     }
 
     function processUploadedImage(img, canvas, channel) {
-        // 隐藏上传提示文字
-        const hint = canvas.parentElement.querySelector('.upload-hint');
-        if (hint) hint.classList.add('hidden');
-
         resizeCanvasToFit(canvas, img);
 
         const ctx = canvas.getContext('2d');
@@ -862,7 +901,6 @@
         showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} ${modeLabel} image loaded.`);
     }
 
-
     modeToggle.addEventListener('change', () => {
         const isGrayscaleMode = modeToggle.checked;
         if (isGrayscaleMode) {
@@ -903,6 +941,10 @@
 
     // Handle image upload
     function handleImageUpload(file, canvas, channel) {
+        // 隐藏上传提示文字
+        const hint = canvas.parentElement.querySelector('.upload-hint');
+        if (hint) hint.classList.add('hidden');
+
         // 检查是否为支持的图片格式（包括需要后端转换的）
         const isImage = file.type.startsWith('image/') || needsBackendConversion(file.name);
         if (!isImage) {
@@ -1089,7 +1131,11 @@
 
     splitInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            handleSplitImageUpload(e.target.files[0]);
+            const file = e.target.files[0];
+            const filenameSpan = document.getElementById('split-filename');
+            filenameSpan.textContent = file.name;
+            filenameSpan.classList.remove('empty');
+            handleSplitImageUpload(file);
         }
     });
 
@@ -1100,6 +1146,15 @@
     let originalImageData = null;
 
     function handleSplitImageUpload(file) {
+        // 隐藏上传提示文字
+        const hint = document.getElementById('split-hint');
+        if (hint) hint.classList.add('hidden');
+
+        // 更新文件名显示
+        const filenameSpan = document.getElementById('split-filename');
+        filenameSpan.textContent = file.name;
+        filenameSpan.classList.remove('empty');
+
         // 检查是否为支持的图片格式（包括需要后端转换的）
         const isImage = file.type.startsWith('image/') || needsBackendConversion(file.name);
         if (!isImage) {
@@ -1212,9 +1267,8 @@
     async function checkBackendStatus() {
         const statusDiv = document.getElementById('backend-status');
         const statusDetail = document.getElementById('backend-status-detail');
-
         try {
-            const response = await fetch(`${API_BASE}/health`, { method: 'GET' });
+            const response = await fetch('http://localhost:5000/api/health', { method: 'GET' });
             if (response.ok) {
                 const data = await response.json();
                 statusDiv.style.borderLeftColor = '#22c55e';
@@ -1233,13 +1287,9 @@
             statusDetail.textContent = 'Cannot connect to http://localhost:5000. Please start backend first.';
         }
     }
-
-    // Check on page load
     checkBackendStatus();
-    // Recheck every 10 seconds
     setInterval(checkBackendStatus, 10000);
 </script>
-
 <script>
     // Backend API configuration
     const API_BASE = 'http://localhost:5000/api';
@@ -1247,17 +1297,14 @@
     async function convertWithBackend(file) {
         const formData = new FormData();
         formData.append('image', file);
-
         const response = await fetch(`${API_BASE}/convert`, {
             method: 'POST',
             body: formData
         });
-
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Conversion failed');
         }
-
         const blob = await response.blob();
         return URL.createObjectURL(blob);
     }
@@ -1265,15 +1312,12 @@
     async function getImageInfo(file) {
         const formData = new FormData();
         formData.append('image', file);
-
         const response = await fetch(`${API_BASE}/info`, {
             method: 'POST',
             body: formData
         });
-
         return response.json();
     }
 </script>
-
 </body>
 </html>
