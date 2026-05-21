@@ -5,14 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Channel Tool</title>
     <style>
-        /* CSS Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* CSS Variables */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary-color: #4f46e5;
             --secondary-color: #10b981;
@@ -23,46 +16,33 @@
             --hover-color: #4338ca;
             --secondary-hover: #059669;
         }
-
-        /* Body Styles */
         body {
             background-color: var(--background-color);
             color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
         }
-
-        /* Container */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
-
-        /* Header */
         .header {
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 2rem;
         }
-
         .title {
             font-size: 2.5rem;
             font-weight: bold;
             text-align: center;
         }
-
-        /* Tabs */
         .tabs {
             margin-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
         }
-
-        .tabs nav {
-            display: flex;
-        }
-
+        .tabs nav { display: flex; }
         .tab {
             padding: 1rem 1.5rem;
             border: none;
@@ -74,34 +54,20 @@
             transition: all 0.3s;
             margin-right: 0.5rem;
         }
-
-        .tab:hover {
-            color: var(--text-color);
-        }
-
+        .tab:hover { color: var(--text-color); }
         .tab-active {
             border-bottom-color: var(--primary-color);
             color: var(--primary-color);
         }
-
-        /* Tab Panels */
-        .tab-panel {
-            display: block;
-        }
-
-        .tab-panel.hidden {
-            display: none;
-        }
-
-        /* Channel Grid */
+        .tab-panel { display: block; }
+        .tab-panel.hidden { display: none; }
+        .hidden { display: none !important; }
         .channel-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
-        /* Cards */
         .card {
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
@@ -109,18 +75,14 @@
             padding: 1rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-
         .combined-card {
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
         .split-upload-card {
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
-        /* Channel Titles */
         .channel-title {
             display: flex;
             align-items: center;
@@ -128,20 +90,16 @@
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
-
         .combined-title {
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 1rem;
         }
-
         .split-upload-title {
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 1rem;
         }
-
-        /* Color Indicators */
         .color-indicator {
             width: 1rem;
             height: 1rem;
@@ -149,13 +107,14 @@
             margin-right: 0.5rem;
             border-radius: 2px;
         }
-
         .color-indicator.red { background-color: #ef4444; }
         .color-indicator.green { background-color: #22c55e; }
         .color-indicator.blue { background-color: #3b82f6; }
         .color-indicator.gray { background-color: #6b7280; }
-
-        /* Canvas Containers */
+        .color-indicator.rgb {
+            background: linear-gradient(90deg, #ef4444 33%, #22c55e 33%, #22c55e 66%, #3b82f6 66%);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
         .canvas-container {
             position: relative;
             width: 100%;
@@ -168,30 +127,20 @@
             overflow: hidden;
             transition: all 0.3s;
         }
-
         .canvas-container.drag-over {
             border-color: var(--primary-color);
             background-color: rgba(79, 70, 229, 0.05);
         }
-
         .canvas-container canvas {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
         }
-
-        .combined-container,
-        .split-upload-container {
-            height: 300px;
-        }
-
-        /* Drop Hint */
+        .combined-container, .split-upload-container { height: 300px; }
         .drop-hint {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -203,24 +152,14 @@
             transition: opacity 0.3s;
             font-size: 0.875rem;
         }
-
-        .canvas-container.drag-over .drop-hint {
-            opacity: 1;
-        }
-
-        .upload-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Button Groups */
+        .canvas-container.drag-over .drop-hint { opacity: 1; }
+        .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
         .button-group {
             display: flex;
             justify-content: center;
             margin-top: 1rem;
+            gap: 0.5rem;
         }
-
-        /* Buttons */
         .btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -232,58 +171,45 @@
             align-items: center;
             justify-content: center;
         }
-
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
         }
-
-        .btn-primary:hover {
-            background-color: var(--hover-color);
-        }
-
+        .btn-primary:hover { background-color: var(--hover-color); }
         .btn-secondary {
             background-color: var(--secondary-color);
             color: white;
         }
-
-        .btn-secondary:hover {
-            background-color: var(--secondary-hover);
+        .btn-secondary:hover { background-color: var(--secondary-hover); }
+        .btn-danger {
+            background-color: #dc2626;
+            color: white;
         }
-
-        .btn-icon {
-            margin-right: 0.5rem;
-            font-size: 1rem;
+        .btn-danger:hover { background-color: #b91c1c; }
+        .btn-icon { margin-right: 0.5rem; font-size: 1rem; }
+        .btn.disabled {
+            background-color: #9ca3af !important;
+            cursor: not-allowed !important;
+            opacity: 0.5;
+            pointer-events: none;
         }
-
-        /* Combined Actions */
-        .combined-actions,
-        .split-upload-actions {
+        .combined-actions, .split-upload-actions {
             display: flex;
             justify-content: center;
             gap: 1rem;
             margin-top: 1.5rem;
         }
-
-        /* Split Grid */
         .split-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
         }
-
-        /* Download All Container */
-        .download-all-container {
-            margin-top: 2rem;
-        }
-
+        .download-all-container { margin-top: 2rem; }
         .btn-full-width {
             width: 100%;
             padding: 0.75rem;
             font-size: 1.125rem;
         }
-
-        /* Toast Notification */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -297,39 +223,17 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        /* Responsive Design */
+        .toast.show { opacity: 1; }
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .title {
-                font-size: 2rem;
-            }
-
-            .channel-grid,
-            .split-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .combined-actions,
-            .split-upload-actions {
+            .container { padding: 1rem; }
+            .title { font-size: 2rem; }
+            .channel-grid, .split-grid { grid-template-columns: 1fr; }
+            .combined-actions, .split-upload-actions {
                 flex-direction: column;
                 align-items: center;
             }
-
-            .btn {
-                width: 100%;
-                max-width: 200px;
-            }
+            .btn { width: 100%; max-width: 200px; }
         }
-
-        /* Format Notice Banner - 缩小版本 */
         .format-notice {
             margin: 0.5rem 0;
             padding: 0.5rem 0.75rem;
@@ -348,11 +252,6 @@
             border-color: #f59e0b;
             color: #92400e;
         }
-        .notice-py {
-            background-color: #dbeafe;
-            border-color: #3b82f6;
-            color: #1e40af;
-        }
         .format-tag {
             display: inline-block;
             padding: 0.0625rem 0.375rem;
@@ -362,25 +261,9 @@
             margin-right: 0.25rem;
             margin-bottom: 0.125rem;
         }
-        .format-tag.supported {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        .notice-pure .format-tag.supported {
-            background-color: #fde68a;
-            color: #92400e;
-        }
-        .format-tag.unsupported {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-        .format-notice code {
-            background-color: rgba(0,0,0,0.1);
-            padding: 0.0625rem 0.25rem;
-            border-radius: 0.25rem;
-            font-family: monospace;
-            font-size: 0.75rem;
-        }
+        .format-tag.supported { background-color: #dcfce7; color: #166534; }
+        .notice-pure .format-tag.supported { background-color: #fde68a; color: #92400e; }
+        .format-tag.unsupported { background-color: #fee2e2; color: #991b1b; }
         .format-notice a {
             color: inherit;
             text-decoration: underline;
@@ -391,90 +274,6 @@
             margin-top: 0.25rem;
             font-style: italic;
         }
-
-        /* ========== 合并模式开关样式（单行紧凑版） ========== */
-        .mode-toggle-bar {
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            flex-wrap: nowrap;
-        }
-
-        .mode-toggle-bar .mode-label {
-            font-weight: 600;
-            color: var(--text-color);
-            font-size: 0.9375rem;
-            white-space: nowrap;
-        }
-
-        .mode-toggle-bar .mode-text {
-            font-size: 0.875rem;
-            white-space: nowrap;
-            transition: color 0.3s;
-        }
-
-        .mode-toggle-bar .mode-text.active {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .mode-toggle-bar .mode-text.inactive {
-            color: #9ca3af;
-        }
-
-        .mode-toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 48px;
-            height: 26px;
-            flex-shrink: 0;
-        }
-
-        .mode-toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .mode-toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--primary-color);
-            transition: 0.3s;
-            border-radius: 26px;
-        }
-
-        .mode-toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-
-        .mode-toggle-switch input:checked + .mode-toggle-slider {
-            background-color: var(--secondary-color);
-        }
-
-        .mode-toggle-switch input:checked + .mode-toggle-slider:before {
-            transform: translateX(22px);
-        }
-
         .upload-filename {
             flex: 1;
             min-width: 0;
@@ -490,20 +289,11 @@
             text-overflow: ellipsis;
             line-height: 1.5;
         }
-        .upload-filename.empty {
-            color: #9ca3af;
-        }
-
-        /* ========== 文件输入框彻底隐藏 ========== */
-        input[type="file"].hidden {
-            display: none !important;
-        }
-
-        /* ========== 上传区域提示文字 ========== */
+        .upload-filename.empty { color: #9ca3af; }
+        input[type="file"].hidden { display: none !important; }
         .upload-hint {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             color: #9ca3af;
             font-size: 0.9375rem;
@@ -512,25 +302,125 @@
             text-align: center;
             z-index: 1;
         }
-        .upload-hint.hidden {
-            display: none;
+        .upload-hint.hidden { display: none; }
+        .file-status {
+            margin-top: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            background-color: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+        .file-status.empty { color: #9ca3af; }
+        .disabled-card {
+            opacity: 0.4;
+            filter: grayscale(0.6);
+            transition: all 0.3s;
+        }
+        .disabled-card .canvas-container,
+        .disabled-card .btn-primary { pointer-events: none; }
+        .disabled-card .btn-danger {
+            pointer-events: auto;
+            opacity: 1;
+            filter: none;
+        }
+        .disabled-card .upload-hint { opacity: 0.5; }
+        .no-channel-hint {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.85);
+            color: #9ca3af;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 2;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .no-channel-hint.hidden { display: none !important; }
+        .split-upload-actions-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* ===== Per-channel toggle switch ===== */
+        .channel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .channel-toggle-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.15rem;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+        }
+        .channel-toggle-label {
+            font-size: 0.625rem;
+            color: #6b7280;
+            font-weight: 600;
+            white-space: nowrap;
+            line-height: 1;
+        }
+        .channel-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 32px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+        .channel-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .channel-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #9ca3af;
+            transition: 0.3s;
+            border-radius: 18px;
+        }
+        .channel-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .channel-toggle-switch input:checked + .channel-toggle-slider {
+            background-color: var(--primary-color);
+        }
+        .channel-toggle-switch input:checked + .channel-toggle-slider:before {
+            transform: translateX(14px);
         }
     </style>
     <base target="_blank">
     <base target="_blank">
-<base target="_blank">
+    <base target="_blank">
+    <base target="_blank">
 <base target="_blank">
 </head>
 <body>
-<!-- ============================================
- FORMAT NOTICE: This is the PURE FRONTEND version.
- Supported formats: PNG, JPG, JPEG, GIF, WebP, BMP
- (Any format your browser can natively display.)
-
- NOT supported: EXR, DDS, HDR, TIFF, RAW, PSD, TGA
- For these formats, use image_channel_py.html
- with the Python backend running.
- ============================================ -->
 <div class="container">
     <header class="header">
         <h1 class="title">Image Channel Tool</h1>
@@ -544,15 +434,12 @@
     </div>
     <div class="tabs">
         <nav>
-            <button id="split-tab" class="tab tab-active">
-                Split Channels
-            </button>
-            <button id="combine-tab" class="tab">
-                Combine Channels
-            </button>
+            <button id="split-tab" class="tab tab-active">Split Channels</button>
+            <button id="combine-tab" class="tab">Combine Channels</button>
         </nav>
     </div>
 
+    <!-- ========== SPLIT PANEL ========== -->
     <div id="split-panel" class="tab-panel">
         <div class="card split-upload-card">
             <div style="display: flex; align-items: center; margin-bottom: 1rem;">
@@ -568,73 +455,92 @@
                 </div>
             </div>
             <input type="file" id="split-input" class="hidden" accept="image/*" style="display:none;">
-            <div class="split-upload-actions">
+            <div class="split-upload-actions-wrapper">
                 <button id="split-upload" class="btn btn-primary">
                     <span class="btn-icon">↑</span> Upload Image
                 </button>
                 <button id="split-btn" class="btn btn-secondary">
                     <span class="btn-icon">⚡</span> Split Channels
                 </button>
+                <button id="split-delete" class="btn btn-danger">
+                    <span class="btn-icon">🗑</span> Delete
+                </button>
             </div>
         </div>
 
-        <div id="split-results" class="hidden">
+        <div id="split-results">
             <div class="split-grid">
+                <div class="card">
+                    <h3 class="channel-title">
+                        <span class="color-indicator rgb"></span>
+                        RGB Combined
+                    </h3>
+                    <div class="canvas-container" style="position: relative;">
+                        <canvas id="split-rgb-canvas"></canvas>
+                        <div class="no-channel-hint" id="split-rgb-hint">No image loaded</div>
+                    </div>
+                    <div class="button-group">
+                        <button id="download-rgb" class="btn btn-primary disabled">
+                            <span class="btn-icon">↓</span> Download
+                        </button>
+                    </div>
+                </div>
                 <div class="card">
                     <h3 class="channel-title">
                         <span class="color-indicator red"></span>
                         Red Channel
                     </h3>
-                    <div class="canvas-container">
+                    <div class="canvas-container" style="position: relative;">
                         <canvas id="split-red-canvas"></canvas>
+                        <div class="no-channel-hint" id="split-red-hint">No image loaded</div>
                     </div>
                     <div class="button-group">
-                        <button id="download-red" class="btn btn-primary">
+                        <button id="download-red" class="btn btn-primary disabled">
                             <span class="btn-icon">↓</span> Download
                         </button>
                     </div>
                 </div>
-
                 <div class="card">
                     <h3 class="channel-title">
                         <span class="color-indicator green"></span>
                         Green Channel
                     </h3>
-                    <div class="canvas-container">
+                    <div class="canvas-container" style="position: relative;">
                         <canvas id="split-green-canvas"></canvas>
+                        <div class="no-channel-hint" id="split-green-hint">No image loaded</div>
                     </div>
                     <div class="button-group">
-                        <button id="download-green" class="btn btn-primary">
+                        <button id="download-green" class="btn btn-primary disabled">
                             <span class="btn-icon">↓</span> Download
                         </button>
                     </div>
                 </div>
-
                 <div class="card">
                     <h3 class="channel-title">
                         <span class="color-indicator blue"></span>
                         Blue Channel
                     </h3>
-                    <div class="canvas-container">
+                    <div class="canvas-container" style="position: relative;">
                         <canvas id="split-blue-canvas"></canvas>
+                        <div class="no-channel-hint" id="split-blue-hint">No image loaded</div>
                     </div>
                     <div class="button-group">
-                        <button id="download-blue" class="btn btn-primary">
+                        <button id="download-blue" class="btn btn-primary disabled">
                             <span class="btn-icon">↓</span> Download
                         </button>
                     </div>
                 </div>
-
                 <div class="card">
                     <h3 class="channel-title">
                         <span class="color-indicator gray"></span>
                         Alpha Channel
                     </h3>
-                    <div class="canvas-container">
+                    <div class="canvas-container" style="position: relative;">
                         <canvas id="split-alpha-canvas"></canvas>
+                        <div class="no-channel-hint" id="split-alpha-hint">No image loaded</div>
                     </div>
                     <div class="button-group">
-                        <button id="download-alpha" class="btn btn-primary">
+                        <button id="download-alpha" class="btn btn-primary disabled">
                             <span class="btn-icon">↓</span> Download
                         </button>
                     </div>
@@ -643,18 +549,56 @@
         </div>
 
         <div class="download-all-container">
-            <button id="download-all" class="btn btn-secondary btn-full-width">
+            <button id="download-all" class="btn btn-secondary btn-full-width disabled">
                 <span class="btn-icon">📥</span> Download All Channels
             </button>
         </div>
     </div>
+
+    <!-- ========== COMBINE PANEL ========== -->
     <div id="combine-panel" class="tab-panel hidden">
         <div class="channel-grid">
-            <div class="card">
+            <!-- RGB Image -->
+            <div class="card" id="rgb-card">
                 <h3 class="channel-title">
-                    <span class="color-indicator red"></span>
-                    Red Channel
+                    <span class="color-indicator rgb"></span>
+                    RGB Image
                 </h3>
+                <div id="rgb-canvas" class="canvas-container">
+                    <canvas></canvas>
+                    <div class="upload-hint">Click or drop image here</div>
+                    <div class="drop-hint">
+                        <span class="upload-icon">📁</span>
+                        <p>Drop image here</p>
+                    </div>
+                </div>
+                <input type="file" id="rgb-input" class="hidden" accept="image/*" style="display:none;">
+                <div class="file-status empty" id="rgb-filename">No file selected</div>
+                <div class="button-group">
+                    <button id="rgb-upload" class="btn btn-primary">
+                        <span class="btn-icon">↑</span> Upload
+                    </button>
+                    <button id="rgb-delete" class="btn btn-danger">
+                        <span class="btn-icon">🗑</span> Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- Red Channel -->
+            <div class="card" id="red-card">
+                <div class="channel-header">
+                    <h3 class="channel-title">
+                        <span class="color-indicator red"></span>
+                        Red Channel
+                    </h3>
+                    <div class="channel-toggle-group">
+                        <span class="channel-toggle-label" id="red-toggle-label">Extract</span>
+                        <label class="channel-toggle-switch">
+                            <input type="checkbox" id="red-toggle">
+                            <span class="channel-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
                 <div id="red-canvas" class="canvas-container">
                     <canvas></canvas>
                     <div class="upload-hint">Click or drop image here</div>
@@ -664,18 +608,32 @@
                     </div>
                 </div>
                 <input type="file" id="red-input" class="hidden" accept="image/*" style="display:none;">
+                <div class="file-status empty" id="red-filename">No file selected</div>
                 <div class="button-group">
                     <button id="red-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
                     </button>
+                    <button id="red-delete" class="btn btn-danger">
+                        <span class="btn-icon">🗑</span> Delete
+                    </button>
                 </div>
             </div>
 
-            <div class="card">
-                <h3 class="channel-title">
-                    <span class="color-indicator green"></span>
-                    Green Channel
-                </h3>
+            <!-- Green Channel -->
+            <div class="card" id="green-card">
+                <div class="channel-header">
+                    <h3 class="channel-title">
+                        <span class="color-indicator green"></span>
+                        Green Channel
+                    </h3>
+                    <div class="channel-toggle-group">
+                        <span class="channel-toggle-label" id="green-toggle-label">Extract</span>
+                        <label class="channel-toggle-switch">
+                            <input type="checkbox" id="green-toggle">
+                            <span class="channel-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
                 <div id="green-canvas" class="canvas-container">
                     <canvas></canvas>
                     <div class="upload-hint">Click or drop image here</div>
@@ -685,18 +643,32 @@
                     </div>
                 </div>
                 <input type="file" id="green-input" class="hidden" accept="image/*" style="display:none;">
+                <div class="file-status empty" id="green-filename">No file selected</div>
                 <div class="button-group">
                     <button id="green-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
                     </button>
+                    <button id="green-delete" class="btn btn-danger">
+                        <span class="btn-icon">🗑</span> Delete
+                    </button>
                 </div>
             </div>
 
-            <div class="card">
-                <h3 class="channel-title">
-                    <span class="color-indicator blue"></span>
-                    Blue Channel
-                </h3>
+            <!-- Blue Channel -->
+            <div class="card" id="blue-card">
+                <div class="channel-header">
+                    <h3 class="channel-title">
+                        <span class="color-indicator blue"></span>
+                        Blue Channel
+                    </h3>
+                    <div class="channel-toggle-group">
+                        <span class="channel-toggle-label" id="blue-toggle-label">Extract</span>
+                        <label class="channel-toggle-switch">
+                            <input type="checkbox" id="blue-toggle">
+                            <span class="channel-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
                 <div id="blue-canvas" class="canvas-container">
                     <canvas></canvas>
                     <div class="upload-hint">Click or drop image here</div>
@@ -706,18 +678,32 @@
                     </div>
                 </div>
                 <input type="file" id="blue-input" class="hidden" accept="image/*" style="display:none;">
+                <div class="file-status empty" id="blue-filename">No file selected</div>
                 <div class="button-group">
                     <button id="blue-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
                     </button>
+                    <button id="blue-delete" class="btn btn-danger">
+                        <span class="btn-icon">🗑</span> Delete
+                    </button>
                 </div>
             </div>
 
-            <div class="card">
-                <h3 class="channel-title">
-                    <span class="color-indicator gray"></span>
-                    Alpha Channel
-                </h3>
+            <!-- Alpha Channel -->
+            <div class="card" id="alpha-card">
+                <div class="channel-header">
+                    <h3 class="channel-title">
+                        <span class="color-indicator gray"></span>
+                        Alpha Channel
+                    </h3>
+                    <div class="channel-toggle-group">
+                        <span class="channel-toggle-label" id="alpha-toggle-label">Extract</span>
+                        <label class="channel-toggle-switch">
+                            <input type="checkbox" id="alpha-toggle">
+                            <span class="channel-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
                 <div id="alpha-canvas" class="canvas-container">
                     <canvas></canvas>
                     <div class="upload-hint">Click or drop image here</div>
@@ -727,23 +713,16 @@
                     </div>
                 </div>
                 <input type="file" id="alpha-input" class="hidden" accept="image/*" style="display:none;">
+                <div class="file-status empty" id="alpha-filename">No file selected</div>
                 <div class="button-group">
                     <button id="alpha-upload" class="btn btn-primary">
                         <span class="btn-icon">↑</span> Upload
                     </button>
+                    <button id="alpha-delete" class="btn btn-danger">
+                        <span class="btn-icon">🗑</span> Delete
+                    </button>
                 </div>
             </div>
-        </div>
-
-        <!-- ========== 合并模式开关（单行紧凑版） ========== -->
-        <div class="mode-toggle-bar">
-            <span class="mode-label">🎯 Merge Mode</span>
-            <span id="mode-text-left" class="mode-text active">Extract Channel</span>
-            <label class="mode-toggle-switch">
-                <input type="checkbox" id="combine-mode-toggle">
-                <span class="mode-toggle-slider"></span>
-            </label>
-            <span id="mode-text-right" class="mode-text inactive">Grayscale First</span>
         </div>
 
         <div class="card combined-card">
@@ -755,7 +734,7 @@
                 <button id="combine-btn" class="btn btn-secondary">
                     <span class="btn-icon">🔄</span> Combine Channels
                 </button>
-                <button id="download-combined" class="btn btn-primary">
+                <button id="download-combined" class="btn btn-primary disabled">
                     <span class="btn-icon">↓</span> Download Image
                 </button>
             </div>
@@ -773,14 +752,12 @@
     const splitPanel = document.getElementById('split-panel');
     const toast = document.getElementById('toast');
 
-    // Tab switching
     combineTab.addEventListener('click', () => {
         combineTab.classList.add('tab-active');
         splitTab.classList.remove('tab-active');
         combinePanel.classList.remove('hidden');
         splitPanel.classList.add('hidden');
     });
-
     splitTab.addEventListener('click', () => {
         splitTab.classList.add('tab-active');
         combineTab.classList.remove('tab-active');
@@ -788,74 +765,157 @@
         combinePanel.classList.add('hidden');
     });
 
-    // Toast notification
     function showToast(message) {
         toast.textContent = message;
         toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
     }
 
     // Channel data storage
     const channelData = {
-        red: null,
-        green: null,
-        blue: null,
-        alpha: null
+        red: null, green: null, blue: null, alpha: null, rgb: null
     };
 
-    // ========== 合并模式开关状态 ==========
-    const modeToggle = document.getElementById('combine-mode-toggle');
-    const modeTextLeft = document.getElementById('mode-text-left');
-    const modeTextRight = document.getElementById('mode-text-right');
+    // Per-channel grayscale mode (false = Extract, true = Grayscale)
+    const channelGrayscaleMode = {
+        red: false, green: false, blue: false, alpha: false
+    };
 
-    function getCombineMode() {
-        // false = Extract Channel (取对应通道), true = Grayscale First (先转黑白)
-        return modeToggle.checked;
-    }
-
-    modeToggle.addEventListener('change', () => {
-        const isGrayscaleMode = modeToggle.checked;
-        if (isGrayscaleMode) {
-            modeTextLeft.classList.remove('active');
-            modeTextLeft.classList.add('inactive');
-            modeTextRight.classList.remove('inactive');
-            modeTextRight.classList.add('active');
-            showToast('Mode: Grayscale First — images will be converted to grayscale before merging');
-        } else {
-            modeTextLeft.classList.add('active');
-            modeTextLeft.classList.remove('inactive');
-            modeTextRight.classList.remove('active');
-            modeTextRight.classList.add('inactive');
-            showToast('Mode: Extract Channel — only the corresponding color channel will be used');
-        }
+    // Setup per-channel toggles
+    ['red', 'green', 'blue', 'alpha'].forEach(channel => {
+        const toggle = document.getElementById(`${channel}-toggle`);
+        const label = document.getElementById(`${channel}-toggle-label`);
+        toggle.addEventListener('change', () => {
+            channelGrayscaleMode[channel] = toggle.checked;
+            label.textContent = toggle.checked ? 'Grayscale' : 'Extract';
+            // Re-render preview if image already loaded
+            if (channelData[channel]) {
+                const canvas = document.getElementById(`${channel}-canvas`).querySelector('canvas');
+                renderChannelPreview(canvas, channelData[channel], channel);
+                showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} mode: ${toggle.checked ? 'Grayscale' : 'Extract Channel'}`);
+            }
+        });
     });
 
-    // Setup channel inputs
+    // Render preview for a single channel (Extract or Grayscale)
+    function renderChannelPreview(canvas, info, channel) {
+        const ctx = canvas.getContext('2d');
+        const data = info.data;
+        const channelIndex = ['red', 'green', 'blue', 'alpha'].indexOf(channel);
+        const isGrayscale = channelGrayscaleMode[channel];
+        const previewData = new Uint8ClampedArray(data.length);
+
+        if (isGrayscale) {
+            for (let i = 0; i < data.length; i += 4) {
+                const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+                previewData[i] = lum;
+                previewData[i + 1] = lum;
+                previewData[i + 2] = lum;
+                previewData[i + 3] = 255;
+            }
+        } else {
+            for (let i = 0; i < data.length; i += 4) {
+                const value = data[i + channelIndex];
+                previewData[i] = value;
+                previewData[i + 1] = value;
+                previewData[i + 2] = value;
+                previewData[i + 3] = 255;
+            }
+        }
+
+        canvas.width = info.width;
+        canvas.height = info.height;
+        ctx.putImageData(new ImageData(previewData, info.width, info.height), 0, 0);
+    }
+
+    // Clear / Delete channel
+    function clearChannel(channel) {
+        channelData[channel] = null;
+        const canvasContainer = document.getElementById(`${channel}-canvas`);
+        const canvas = canvasContainer.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.width = 0;
+        canvas.height = 0;
+
+        const hint = canvasContainer.querySelector('.upload-hint');
+        if (hint) hint.classList.remove('hidden');
+
+        const filenameEl = document.getElementById(`${channel}-filename`);
+        if (filenameEl) {
+            filenameEl.textContent = 'No file selected';
+            filenameEl.classList.add('empty');
+        }
+
+        // Reset toggle
+        if (channel !== 'rgb') {
+            const toggle = document.getElementById(`${channel}-toggle`);
+            const label = document.getElementById(`${channel}-toggle-label`);
+            if (toggle) { toggle.checked = false; channelGrayscaleMode[channel] = false; }
+            if (label) label.textContent = 'Extract';
+        }
+
+        updateCardStates();
+        showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} cleared.`);
+    }
+
+    function updateCardStates() {
+        const hasRGB = channelData.rgb !== null;
+        const hasIndividual = channelData.red !== null || channelData.green !== null || channelData.blue !== null;
+        const rgbCard = document.getElementById('rgb-card');
+        const redCard = document.getElementById('red-card');
+        const greenCard = document.getElementById('green-card');
+        const blueCard = document.getElementById('blue-card');
+
+        if (hasRGB) {
+            redCard?.classList.add('disabled-card');
+            greenCard?.classList.add('disabled-card');
+            blueCard?.classList.add('disabled-card');
+            rgbCard?.classList.remove('disabled-card');
+        } else if (hasIndividual) {
+            rgbCard?.classList.add('disabled-card');
+            redCard?.classList.remove('disabled-card');
+            greenCard?.classList.remove('disabled-card');
+            blueCard?.classList.remove('disabled-card');
+        } else {
+            rgbCard?.classList.remove('disabled-card');
+            redCard?.classList.remove('disabled-card');
+            greenCard?.classList.remove('disabled-card');
+            blueCard?.classList.remove('disabled-card');
+        }
+    }
+
+    // Setup RGB input
+    const rgbUploadBtn = document.getElementById('rgb-upload');
+    const rgbInput = document.getElementById('rgb-input');
+    const rgbCanvasContainer = document.getElementById('rgb-canvas');
+    const rgbCanvas = rgbCanvasContainer.querySelector('canvas');
+    const rgbDeleteBtn = document.getElementById('rgb-delete');
+
+    rgbUploadBtn.addEventListener('click', () => rgbInput.click());
+    rgbDeleteBtn.addEventListener('click', () => clearChannel('rgb'));
+    rgbInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleImageUpload(e.target.files[0], rgbCanvas, 'rgb');
+    });
+    setupDragAndDrop(rgbCanvasContainer, (file) => handleImageUpload(file, rgbCanvas, 'rgb'));
+
+    // Setup individual channel inputs
     ['red', 'green', 'blue', 'alpha'].forEach(channel => {
         const uploadBtn = document.getElementById(`${channel}-upload`);
         const input = document.getElementById(`${channel}-input`);
         const canvasContainer = document.getElementById(`${channel}-canvas`);
         const canvas = canvasContainer.querySelector('canvas');
+        const deleteBtn = document.getElementById(`${channel}-delete`);
 
         uploadBtn.addEventListener('click', () => input.click());
-
+        if (deleteBtn) deleteBtn.addEventListener('click', () => clearChannel(channel));
         input.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleImageUpload(e.target.files[0], canvas, channel);
-            }
+            if (e.target.files.length > 0) handleImageUpload(e.target.files[0], canvas, channel);
         });
-
-        // Drag and drop
-        setupDragAndDrop(canvasContainer, (file) => {
-            handleImageUpload(file, canvas, channel);
-        });
+        setupDragAndDrop(canvasContainer, (file) => handleImageUpload(file, canvas, channel));
     });
 
-    // Handle image upload
     function handleImageUpload(file, canvas, channel) {
-        // 隐藏上传提示文字
         const hint = canvas.parentElement.querySelector('.upload-hint');
         if (hint) hint.classList.add('hidden');
 
@@ -864,79 +924,57 @@
             return;
         }
 
+        const filenameEl = document.getElementById(`${channel}-filename`);
+        if (filenameEl) {
+            filenameEl.textContent = file.name;
+            filenameEl.classList.remove('empty');
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
                 resizeCanvasToFit(canvas, img);
-
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
                 canvas.width = img.width;
                 canvas.height = img.height;
-
                 ctx.drawImage(img, 0, 0);
 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const data = imageData.data;
-                const channelIndex = ['red', 'green', 'blue', 'alpha'].indexOf(channel);
 
-                // ========== 预览显示：根据当前模式决定 ==========
-                const isGrayscaleMode = getCombineMode();
-                const grayData = new Uint8ClampedArray(data.length);
-
-                if (isGrayscaleMode) {
-                    // 模式2：先转灰度（ luminance 公式 0.299R + 0.587G + 0.114B ）
-                    for (let i = 0; i < data.length; i += 4) {
-                        // 忽略 alpha，用 RGB 算亮度
-                        const lum = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
-                        grayData[i] = lum;
-                        grayData[i + 1] = lum;
-                        grayData[i + 2] = lum;
-                        grayData[i + 3] = 255;
-                    }
+                if (channel === 'rgb') {
+                    channelData[channel] = {
+                        width: canvas.width,
+                        height: canvas.height,
+                        data: new Uint8ClampedArray(data)
+                    };
+                    showToast('RGB image loaded.');
                 } else {
-                    // 模式1：取对应通道
-                    for (let i = 0; i < data.length; i += 4) {
-                        const value = data[i + channelIndex];
-                        grayData[i] = value;
-                        grayData[i + 1] = value;
-                        grayData[i + 2] = value;
-                        grayData[i + 3] = 255;
-                    }
+                    channelData[channel] = {
+                        width: canvas.width,
+                        height: canvas.height,
+                        data: new Uint8ClampedArray(data)
+                    };
+                    renderChannelPreview(canvas, channelData[channel], channel);
+                    const modeLabel = channelGrayscaleMode[channel] ? 'grayscale' : 'channel';
+                    showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} ${modeLabel} image loaded.`);
                 }
-
-                const grayImageData = new ImageData(grayData, canvas.width, canvas.height);
-                ctx.putImageData(grayImageData, 0, 0);
-
-                // 存储原始数据，合并时根据模式重新计算
-                channelData[channel] = {
-                    width: canvas.width,
-                    height: canvas.height,
-                    data: new Uint8ClampedArray(data)
-                };
-
-                const modeLabel = isGrayscaleMode ? 'grayscale' : 'channel';
-                showToast(`${channel.charAt(0).toUpperCase() + channel.slice(1)} ${modeLabel} image loaded.`);
+                updateCardStates();
             };
-            img.onerror = () => {
-                showToast('Failed to load image. Please try again.');
-            };
+            img.onerror = () => showToast('Failed to load image. Please try again.');
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    // Resize canvas to fit image while maintaining aspect ratio
     function resizeCanvasToFit(canvas, img) {
         const container = canvas.parentElement;
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
-
         const imgRatio = img.width / img.height;
         const containerRatio = containerWidth / containerHeight;
-
         let newWidth, newHeight;
         if (imgRatio > containerRatio) {
             newWidth = containerWidth;
@@ -945,37 +983,24 @@
             newHeight = containerHeight;
             newWidth = newHeight * imgRatio;
         }
-
         canvas.width = newWidth;
         canvas.height = newHeight;
     }
 
-    // Setup drag and drop
     function setupDragAndDrop(element, onDrop) {
         element.addEventListener('dragover', (e) => {
             e.preventDefault();
             element.classList.add('drag-over');
         });
-
-        element.addEventListener('dragleave', () => {
-            element.classList.remove('drag-over');
-        });
-
+        element.addEventListener('dragleave', () => element.classList.remove('drag-over'));
         element.addEventListener('drop', (e) => {
             e.preventDefault();
             element.classList.remove('drag-over');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                onDrop(files[0]);
-            }
+            if (e.dataTransfer.files.length > 0) onDrop(e.dataTransfer.files[0]);
         });
-
         element.addEventListener('click', () => {
             const input = element.parentElement.querySelector('input[type="file"]');
-            if (input) {
-                input.click();
-            }
+            if (input) input.click();
         });
     }
 
@@ -985,13 +1010,17 @@
     const downloadCombinedBtn = document.getElementById('download-combined');
 
     combineBtn.addEventListener('click', () => {
+        const hasRGB = channelData.rgb !== null;
+        const hasIndividual = channelData.red !== null || channelData.green !== null || channelData.blue !== null;
+        if (hasRGB && hasIndividual) {
+            alert("Conflict detected: You have uploaded both an RGB image and individual R/G/B channel images. Please choose either the RGB image OR the individual R/G/B channels, not both.");
+            return;
+        }
         const hasAnyChannel = Object.values(channelData).some(data => data !== null);
         if (!hasAnyChannel) {
             showToast('Please upload at least one channel image.');
             return;
         }
-
-        const isGrayscaleMode = getCombineMode();
 
         let maxWidth = 0;
         let maxHeight = 0;
@@ -1004,12 +1033,9 @@
 
         combinedCanvas.width = maxWidth;
         combinedCanvas.height = maxHeight;
-
         const ctx = combinedCanvas.getContext('2d');
         ctx.clearRect(0, 0, combinedCanvas.width, combinedCanvas.height);
-
         const combinedData = ctx.createImageData(maxWidth, maxHeight);
-
         for (let i = 0; i < combinedData.data.length; i += 4) {
             combinedData.data[i] = 0;
             combinedData.data[i + 1] = 0;
@@ -1017,29 +1043,47 @@
             combinedData.data[i + 3] = 0;
         }
 
-        ['red', 'green', 'blue', 'alpha'].forEach((channel, index) => {
-            const channelInfo = channelData[channel];
-            if (channelInfo) {
-                const channelCanvas = document.createElement('canvas');
-                channelCanvas.width = channelInfo.width;
-                channelCanvas.height = channelInfo.height;
-                const channelCtx = channelCanvas.getContext('2d');
+        // Effective channel data (expand RGB image if used)
+        const effectiveChannelData = {
+            red: channelData.red,
+            green: channelData.green,
+            blue: channelData.blue,
+            alpha: channelData.alpha
+        };
 
-                // ========== 根据模式准备通道数据 ==========
+        if (channelData.rgb) {
+            const rgbInfo = channelData.rgb;
+            const srcData = rgbInfo.data;
+            const len = srcData.length;
+            const rData = new Uint8ClampedArray(len);
+            const gData = new Uint8ClampedArray(len);
+            const bData = new Uint8ClampedArray(len);
+            for (let i = 0; i < len; i += 4) {
+                rData[i] = srcData[i];     rData[i+1] = srcData[i];     rData[i+2] = srcData[i];     rData[i+3] = 255;
+                gData[i] = srcData[i+1];   gData[i+1] = srcData[i+1];   gData[i+2] = srcData[i+1];   gData[i+3] = 255;
+                bData[i] = srcData[i+2];   bData[i+1] = srcData[i+2];   bData[i+2] = srcData[i+2];   bData[i+3] = 255;
+            }
+            effectiveChannelData.red = { width: rgbInfo.width, height: rgbInfo.height, data: rData };
+            effectiveChannelData.green = { width: rgbInfo.width, height: rgbInfo.height, data: gData };
+            effectiveChannelData.blue = { width: rgbInfo.width, height: rgbInfo.height, data: bData };
+        }
+
+        ['red', 'green', 'blue', 'alpha'].forEach((channel, index) => {
+            const channelInfo = effectiveChannelData[channel];
+            if (channelInfo) {
+                const isGrayscale = channelGrayscaleMode[channel];
                 const srcData = channelInfo.data;
                 const processedData = new Uint8ClampedArray(srcData.length);
 
-                if (isGrayscaleMode) {
-                    // 模式2：先转灰度，再取 R 通道（灰度图 R=G=B）
+                if (isGrayscale) {
                     for (let i = 0; i < srcData.length; i += 4) {
                         const lum = Math.round(0.299 * srcData[i] + 0.587 * srcData[i + 1] + 0.114 * srcData[i + 2]);
                         processedData[i] = lum;
                         processedData[i + 1] = lum;
                         processedData[i + 2] = lum;
-                        processedData[i + 3] = srcData[i + 3];
+                        processedData[i + 3] = 255;
                     }
                 } else {
-                    // 模式1：取对应通道，其余置零
                     for (let i = 0; i < srcData.length; i += 4) {
                         processedData[i] = 0;
                         processedData[i + 1] = 0;
@@ -1049,6 +1093,10 @@
                     }
                 }
 
+                const channelCanvas = document.createElement('canvas');
+                channelCanvas.width = channelInfo.width;
+                channelCanvas.height = channelInfo.height;
+                const channelCtx = channelCanvas.getContext('2d');
                 channelCtx.putImageData(new ImageData(processedData, channelInfo.width, channelInfo.height), 0, 0);
 
                 const tempCanvas = document.createElement('canvas');
@@ -1056,28 +1104,25 @@
                 tempCanvas.height = maxHeight;
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCtx.drawImage(channelCanvas, 0, 0, maxWidth, maxHeight);
-
                 const tempImageData = tempCtx.getImageData(0, 0, maxWidth, maxHeight);
 
-                // 统一取 R 通道（因为 processedData 已经按模式处理好了）
                 for (let i = 0; i < tempImageData.data.length; i += 4) {
                     combinedData.data[i + index] = tempImageData.data[i];
                 }
             }
         });
 
-        if (!channelData.alpha) {
+        if (!effectiveChannelData.alpha) {
             for (let i = 3; i < combinedData.data.length; i += 4) {
                 combinedData.data[i] = 255;
             }
         }
 
         ctx.putImageData(combinedData, 0, 0);
-        const modeLabel = isGrayscaleMode ? 'Grayscale' : 'Channel';
-        showToast(`${modeLabel} mode: Channels combined successfully!`);
+        downloadCombinedBtn.classList.remove('disabled');
+        showToast('Channels combined successfully!');
     });
 
-    // Download combined image
     downloadCombinedBtn.addEventListener('click', () => {
         if (combinedCanvas.width === 0 || combinedCanvas.height === 0) {
             showToast('Please combine channels first.');
@@ -1086,80 +1131,110 @@
         downloadCanvasAsImage(combinedCanvas, 'combined-rgba-image.png');
     });
 
-    // Split panel functionality
+    // Split panel
     const splitUploadBtn = document.getElementById('split-upload');
     const splitInput = document.getElementById('split-input');
     const splitInputCanvas = document.getElementById('split-input-canvas');
     const splitBtn = document.getElementById('split-btn');
-    const splitResults = document.getElementById('split-results');
     const splitInputContainer = document.getElementById('split-input-container');
+    const splitDeleteBtn = document.getElementById('split-delete');
 
     splitUploadBtn.addEventListener('click', () => splitInput.click());
+    splitDeleteBtn.addEventListener('click', () => {
+        const ctx = splitInputCanvas.getContext('2d');
+        ctx.clearRect(0, 0, splitInputCanvas.width, splitInputCanvas.height);
+        splitInputCanvas.width = 0;
+        splitInputCanvas.height = 0;
+        const hint = document.getElementById('split-hint');
+        if (hint) hint.classList.remove('hidden');
+        const filenameSpan = document.getElementById('split-filename');
+        filenameSpan.textContent = 'No file selected';
+        filenameSpan.classList.add('empty');
+        originalImageData = null;
+        splitOriginalFilename = '';
+        resetSplitResults();
+        showToast('Split input cleared.');
+    });
+
+    function resetSplitResults() {
+        ['rgb', 'red', 'green', 'blue', 'alpha'].forEach(channel => {
+            const canvas = document.getElementById(`split-${channel}-canvas`);
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.width = 0;
+                canvas.height = 0;
+            }
+            const hint = document.getElementById(`split-${channel}-hint`);
+            if (hint) hint.classList.remove('hidden');
+        });
+        ['rgb', 'red', 'green', 'blue', 'alpha'].forEach(ch => {
+            const btn = document.getElementById(`download-${ch}`);
+            if (btn) btn.classList.add('disabled');
+        });
+        const allBtn = document.getElementById('download-all');
+        if (allBtn) allBtn.classList.add('disabled');
+    }
 
     splitInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
-            const filenameSpan = document.getElementById('split-filename');
-            filenameSpan.textContent = file.name;
-            filenameSpan.classList.remove('empty');
+            document.getElementById('split-filename').textContent = file.name;
+            document.getElementById('split-filename').classList.remove('empty');
             handleSplitImageUpload(file);
         }
     });
-
-    setupDragAndDrop(splitInputContainer, (file) => {
-        handleSplitImageUpload(file);
-    });
+    setupDragAndDrop(splitInputContainer, (file) => handleSplitImageUpload(file));
 
     let originalImageData = null;
     let splitOriginalFilename = '';
 
     function handleSplitImageUpload(file) {
-        // 隐藏上传提示文字
         const hint = document.getElementById('split-hint');
         if (hint) hint.classList.add('hidden');
-
-        // 更新文件名显示
-        const filenameSpan = document.getElementById('split-filename');
-        filenameSpan.textContent = file.name;
-        filenameSpan.classList.remove('empty');
+        document.getElementById('split-filename').textContent = file.name;
+        document.getElementById('split-filename').classList.remove('empty');
 
         if (!file.type.startsWith('image/')) {
             showToast('Please upload an image file.');
             return;
         }
-
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
                 resizeCanvasToFit(splitInputCanvas, img);
-
                 const ctx = splitInputCanvas.getContext('2d');
                 ctx.clearRect(0, 0, splitInputCanvas.width, splitInputCanvas.height);
-
                 splitInputCanvas.width = img.width;
                 splitInputCanvas.height = img.height;
-
                 ctx.drawImage(img, 0, 0);
-
                 originalImageData = ctx.getImageData(0, 0, splitInputCanvas.width, splitInputCanvas.height);
-
-                // 保存原始文件名（去掉扩展名）用于下载命名
                 const lastDotIndex = file.name.lastIndexOf('.');
                 splitOriginalFilename = lastDotIndex > 0 ? file.name.slice(0, lastDotIndex) : file.name;
-
                 showToast('Image loaded. Click "Split Channels" to process.');
             };
-            img.onerror = () => {
-                showToast('Failed to load image. Please try again.');
-            };
+            img.onerror = () => showToast('Failed to load image. Please try again.');
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    // Download button handlers storage to prevent duplicate binding
     let downloadHandlersBound = false;
+
+    function enableSplitDownloadButtons(hasAlpha = true) {
+        ['rgb', 'red', 'green', 'blue'].forEach(ch => {
+            const btn = document.getElementById(`download-${ch}`);
+            if (btn) btn.classList.remove('disabled');
+        });
+        const alphaBtn = document.getElementById('download-alpha');
+        if (alphaBtn) {
+            if (hasAlpha) alphaBtn.classList.remove('disabled');
+            else alphaBtn.classList.add('disabled');
+        }
+        const allBtn = document.getElementById('download-all');
+        if (allBtn) allBtn.classList.remove('disabled');
+    }
 
     splitBtn.addEventListener('click', () => {
         if (!originalImageData) {
@@ -1167,33 +1242,73 @@
             return;
         }
 
-        splitResults.classList.remove('hidden');
+        // Detect if source image has actual alpha data
+        let hasAlpha = false;
+        for (let i = 3; i < originalImageData.data.length; i += 4) {
+            if (originalImageData.data[i] !== 255) { hasAlpha = true; break; }
+        }
 
         const channels = ['red', 'green', 'blue', 'alpha'];
-
         channels.forEach((channel, index) => {
             const canvas = document.getElementById(`split-${channel}-canvas`);
             canvas.width = originalImageData.width;
             canvas.height = originalImageData.height;
             const ctx = canvas.getContext('2d');
 
-            const channelData = ctx.createImageData(canvas.width, canvas.height);
+            if (channel === 'alpha' && !hasAlpha) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('No alpha channel', canvas.width / 2, canvas.height / 2);
+                ctx.font = '12px sans-serif';
+                ctx.fillText('(Source image has no alpha)', canvas.width / 2, canvas.height / 2 + 22);
+                const hintEl = document.getElementById(`split-${channel}-hint`);
+                if (hintEl) hintEl.classList.add('hidden');
+                return;
+            }
 
+            const channelData = ctx.createImageData(canvas.width, canvas.height);
             for (let i = 0; i < originalImageData.data.length; i += 4) {
                 const value = originalImageData.data[i + index];
-
                 channelData.data[i] = value;
                 channelData.data[i + 1] = value;
                 channelData.data[i + 2] = value;
                 channelData.data[i + 3] = 255;
             }
-
             ctx.putImageData(channelData, 0, 0);
+            const hintEl = document.getElementById(`split-${channel}-hint`);
+            if (hintEl) hintEl.classList.add('hidden');
         });
 
+        // RGB Combined preview: transparent pixels show as white background
+        const rgbCanvas = document.getElementById('split-rgb-canvas');
+        rgbCanvas.width = originalImageData.width;
+        rgbCanvas.height = originalImageData.height;
+        const rgbCtx = rgbCanvas.getContext('2d');
+        const rgbImageData = rgbCtx.createImageData(rgbCanvas.width, rgbCanvas.height);
+        for (let i = 0; i < originalImageData.data.length; i += 4) {
+            const alpha = originalImageData.data[i + 3];
+            if (alpha === 0) {
+                // Transparent area: show white in preview
+                rgbImageData.data[i] = 255;
+                rgbImageData.data[i + 1] = 255;
+                rgbImageData.data[i + 2] = 255;
+            } else {
+                rgbImageData.data[i] = originalImageData.data[i];
+                rgbImageData.data[i + 1] = originalImageData.data[i + 1];
+                rgbImageData.data[i + 2] = originalImageData.data[i + 2];
+            }
+            rgbImageData.data[i + 3] = 255;
+        }
+        rgbCtx.putImageData(rgbImageData, 0, 0);
+        const rgbHint = document.getElementById('split-rgb-hint');
+        if (rgbHint) rgbHint.classList.add('hidden');
+
+        enableSplitDownloadButtons(hasAlpha);
         showToast('Channels split successfully!');
 
-        // Bind download handlers only once
         if (!downloadHandlersBound) {
             channels.forEach((channel, index) => {
                 document.getElementById(`download-${channel}`).addEventListener('click', () => {
@@ -1201,7 +1316,6 @@
                     downloadCanvas.width = originalImageData.width;
                     downloadCanvas.height = originalImageData.height;
                     const downloadCtx = downloadCanvas.getContext('2d');
-
                     const downloadImageData = downloadCtx.createImageData(downloadCanvas.width, downloadCanvas.height);
                     for (let i = 0; i < originalImageData.data.length; i += 4) {
                         const channelValue = originalImageData.data[i + index];
@@ -1216,11 +1330,31 @@
                 });
             });
 
+            document.getElementById('download-rgb').addEventListener('click', () => {
+                const downloadCanvas = document.createElement('canvas');
+                downloadCanvas.width = originalImageData.width;
+                downloadCanvas.height = originalImageData.height;
+                const downloadCtx = downloadCanvas.getContext('2d');
+                const downloadImageData = downloadCtx.createImageData(downloadCanvas.width, downloadCanvas.height);
+                for (let i = 0; i < originalImageData.data.length; i += 4) {
+                    downloadImageData.data[i] = originalImageData.data[i];
+                    downloadImageData.data[i + 1] = originalImageData.data[i + 1];
+                    downloadImageData.data[i + 2] = originalImageData.data[i + 2];
+                    downloadImageData.data[i + 3] = 255;
+                }
+                downloadCtx.putImageData(downloadImageData, 0, 0);
+                downloadCanvasAsImage(downloadCanvas, `${splitOriginalFilename}_RGB.png`);
+            });
+
             document.getElementById('download-all').addEventListener('click', () => {
-                channels.forEach((channel, index) => {
-                    setTimeout(() => {
-                        document.getElementById(`download-${channel}`).click();
-                    }, index * 200);
+                const allChannels = ['rgb', 'red', 'green', 'blue', 'alpha'];
+                let delay = 0;
+                allChannels.forEach((channel) => {
+                    const btn = document.getElementById(`download-${channel}`);
+                    if (btn && !btn.classList.contains('disabled')) {
+                        setTimeout(() => btn.click(), delay);
+                        delay += 200;
+                    }
                 });
                 showToast('All channels downloading...');
             });
@@ -1229,7 +1363,6 @@
         }
     });
 
-    // Download canvas as image
     function downloadCanvasAsImage(canvas, filename) {
         const link = document.createElement('a');
         link.download = filename;
