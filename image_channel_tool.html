@@ -293,7 +293,8 @@
         input[type="file"].hidden { display: none !important; }
         .upload-hint {
             position: absolute;
-            top: 50%; left: 50%;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
             color: #9ca3af;
             font-size: 0.9375rem;
@@ -302,7 +303,42 @@
             text-align: center;
             z-index: 1;
         }
-        .upload-hint.hidden { display: none; }
+        .upload-hint.hidden {
+            display: none;
+        }
+
+        .no-channel-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #9ca3af;
+            font-size: 0.9375rem;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            text-align: center;
+            z-index: 1;
+            white-space: nowrap;
+        }
+        .no-channel-hint.hidden {
+            display: none !important;
+        }
+
+        .alpha-no-data-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #6b7280;
+            font-size: 0.9375rem;
+            text-align: center;
+            z-index: 5;
+            line-height: 1.5;
+            pointer-events: none;
+        }
+        .alpha-no-data-hint.hidden {
+            display: none !important;
+        }
         .file-status {
             margin-top: 0.5rem;
             padding: 0.375rem 0.75rem;
@@ -330,22 +366,7 @@
             filter: none;
         }
         .disabled-card .upload-hint { opacity: 0.5; }
-        .no-channel-hint {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(255, 255, 255, 0.85);
-            color: #9ca3af;
-            font-size: 0.875rem;
-            font-weight: 500;
-            z-index: 2;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .no-channel-hint.hidden { display: none !important; }
+        
         .split-upload-actions-wrapper {
             display: flex;
             justify-content: center;
@@ -541,6 +562,7 @@
                     <div class="canvas-container" style="position: relative;">
                         <canvas id="split-alpha-canvas"></canvas>
                         <div class="no-channel-hint" id="split-alpha-hint">No image loaded</div>
+                        <div class="alpha-no-data-hint hidden" id="alpha-no-data">No alpha channel<br><span style="font-size:0.8rem;">(Source image has no alpha)</span></div>
                     </div>
                     <div class="button-group">
                         <button id="download-alpha" class="btn btn-primary disabled">
@@ -1171,6 +1193,8 @@
             const hint = document.getElementById(`split-${channel}-hint`);
             if (hint) hint.classList.remove('hidden');
         });
+        const noDataEl = document.getElementById('alpha-no-data');
+        if (noDataEl) noDataEl.classList.add('hidden');
         ['rgb', 'red', 'green', 'blue', 'alpha'].forEach(ch => {
             const btn = document.getElementById(`download-${ch}`);
             if (btn) btn.classList.add('disabled');
@@ -1261,12 +1285,11 @@
             if (channel === 'alpha' && !hasAlpha) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#9ca3af';
-                ctx.font = 'bold 14px sans-serif';
+                ctx.font = '500 14px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('No alpha channel', canvas.width / 2, canvas.height / 2);
-                ctx.font = '12px sans-serif';
-                ctx.fillText('(Source image has no alpha)', canvas.width / 2, canvas.height / 2 + 22);
+                ctx.fillText('No alpha channel', canvas.width / 2, canvas.height / 2 - 10);
+                ctx.fillText('(Source image has no alpha)', canvas.width / 2, canvas.height / 2 + 12);
                 const hintEl = document.getElementById(`split-${channel}-hint`);
                 if (hintEl) hintEl.classList.add('hidden');
                 return;
