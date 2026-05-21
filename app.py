@@ -96,7 +96,9 @@ def split_channels():
         return jsonify({'error': 'No image file provided'}), 400
     file = request.files['image']
     try:
-        # Use PIL directly to read original file, bypassing browser premultiplied alpha
+        # Use PIL directly to read original file
+        # Channel Packed PNG: RGB and Alpha are independent channels
+        # Do NOT unpremultiply - the RGB values are the actual color data
         pil_img = Image.open(file.stream)
         if pil_img.mode != 'RGBA':
             pil_img = pil_img.convert('RGBA')
@@ -111,18 +113,10 @@ def split_channels():
             channel_rgba = np.stack([gray, gray, gray, np.ones_like(gray) * 255], axis=-1).astype(np.uint8)
             channels[name] = img_to_base64(Image.fromarray(channel_rgba))
 
-        # RGB Combined: unpremultiply alpha then force alpha=255
-        # PNG from many tools stores premultiplied RGB; we reverse it for correct display
-        rgb = rgba[..., :3].astype(np.float32)
-        alpha = rgba[..., 3:4].astype(np.float32)
-        alpha_safe = np.where(alpha == 0, 1.0, alpha)
-        unpremultiplied = (rgb * 255.0 / alpha_safe).clip(0, 255).astype(np.uint8)
-        # Transparent areas -> white background
-        unpremultiplied[rgba[..., 3] == 0] = [255, 255, 255]
-        rgb_combined = np.concatenate([
-            unpremultiplied,
-            np.full((rgba.shape[0], rgba.shape[1], 1), 255, dtype=np.uint8)
-        ], axis=-1)
+        # RGB Combined: display RGB channel directly, ignore alpha for preview
+        # Channel Packed: RGB contains the actual image, Alpha is a separate mask
+        rgb_combined = rgba.copy()
+        rgb_combined[..., 3] = 255  # Force opaque so browser shows RGB
         channels['rgb'] = img_to_base64(Image.fromarray(rgb_combined))
 
         has_alpha = bool(np.any(rgba[..., 3] != 255))
