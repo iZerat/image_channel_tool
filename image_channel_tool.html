@@ -365,7 +365,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.15rem;
+            gap: 0.35rem;  /* 增大文字与滑块间距 */
             flex-shrink: 0;
             margin-left: 0.5rem;
         }
@@ -375,6 +375,8 @@
             font-weight: 600;
             white-space: nowrap;
             line-height: 1;
+            width: 56px;       /* 固定宽度防止文字切换时跳动 */
+            text-align: center;
         }
         .channel-toggle-switch {
             position: relative;
@@ -419,6 +421,7 @@
     <base target="_blank">
     <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <div class="container">
@@ -430,7 +433,7 @@
         <strong>📋 Format Notice (Pure Frontend)</strong>
         Supported: <span class="format-tag supported">PNG</span> <span class="format-tag supported">JPG</span> <span class="format-tag supported">GIF</span> <span class="format-tag supported">WebP</span> <span class="format-tag supported">BMP</span><br>
         Not supported: <span class="format-tag unsupported">EXR</span> <span class="format-tag unsupported">DDS</span> <span class="format-tag unsupported">HDR</span> <span class="format-tag unsupported">TIFF</span> <span class="format-tag unsupported">TGA</span> <span class="format-tag unsupported">PSD</span> <span class="format-tag unsupported">RAW</span><br>
-        <em>For professional formats, switch to <a href="image_channel_py.html">image_channel_py.html</a> with Python backend.</em>
+        <em><b>⚠️ Alpha Limitation:</b> Browser Canvas clears RGB values of transparent pixels (alpha=0). For PNGs with RGB data in transparent areas (Channel Packed), use <a href="image_channe_tool_py.html">image_channe_tool_py.html</a> with Python backend for accurate splitting.</em>
     </div>
     <div class="tabs">
         <nav>
